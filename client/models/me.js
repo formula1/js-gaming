@@ -1,27 +1,30 @@
+var _ = require('lodash');
 var AmpersandModel = require('ampersand-model');
-
 
 module.exports = AmpersandModel.extend({
     type: 'user',
     props: {
         id: ['string'],
-        firstName: ['string', true, ''],
-        lastName: ['string', true, ''],
-        username: ['string'],
+        firstName: ['string'],
+        lastName: ['string'],
+        username: ['string', true],
     },
     derived: {
         fullName: {
             deps: ['firstName', 'lastName'],
             cache: true,
             fn: function () {
-                return this.firstName + ' ' + this.lastName;
-            }
-        },
-        initials: {
-            deps: ['firstName', 'lastName'],
-            cache: true,
-            fn: function () {
-                return (this.firstName.charAt(0) + this.lastName.charAt(0)).toUpperCase();
+                var fullName;
+                if (_.isEmpty(this.firstName) && _.isEmpty(this.lastName)) {
+                    fullName = 'Stranger';
+                }
+                else if (_.isEmpty(this.firstName)) {
+                    fullName = 'Mr. or Ms. ' + this.lastName;
+                }
+                else {
+                    fullName = this.firstName;
+                }
+                return fullName;
             }
         }
     }

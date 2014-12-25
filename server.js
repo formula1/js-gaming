@@ -18,7 +18,6 @@ var fixPath = function (pathString) {
     return path.resolve(path.normalize(pathString));
 };
 
-
 // -----------------
 // Configure express
 // -----------------
@@ -44,17 +43,15 @@ app.use(helmet.nosniff());
 
 app.set('view engine', 'jade');
 
-
 // -----------------
 // Set up our little demo API
 // -----------------
 var api = require('./fakeApi');
-app.get('/api/people', api.list);
-app.get('/api/people/:id', api.get);
-app.delete('/api/people/:id', api.delete);
-app.put('/api/people/:id', api.update);
-app.post('/api/people', api.add);
-
+app.get('/api/messages', api.list);
+app.get('/api/messages/:id', api.get);
+app.delete('/api/messages/:id', api.delete);
+app.put('/api/messages/:id', api.update);
+app.post('/api/messages', api.add);
 
 // -----------------
 // Enable the functional test site in development
@@ -66,7 +63,6 @@ if (config.isDev) {
     }));
 }
 
-
 // -----------------
 // Set our client config cookie
 // -----------------
@@ -75,14 +71,13 @@ app.use(function (req, res, next) {
     next();
 });
 
-
 // ---------------------------------------------------
 // Configure Moonboots to serve our client application
 // ---------------------------------------------------
 new Moonboots({
     moonboots: {
-        jsFileName: 'my-amazing-app',
-        cssFileName: 'my-amazing-app',
+        jsFileName: 'js-gaming',
+        cssFileName: 'js-gaming',
         main: fixPath('client/app.js'),
         developmentMode: config.isDev,
         libraries: [
@@ -120,7 +115,6 @@ new Moonboots({
     server: app
 });
 
-
 // listen for incoming http requests on the port as specified in our config
 app.listen(config.http.port);
-console.log('My Amazing App is running at: http://localhost:' + config.http.port + ' Yep. That\'s pretty awesome.');
+console.log('JS Gaming is running at: http://localhost:' + config.http.port + '.');

@@ -2,13 +2,14 @@ body
   nav.navbar.navbar-default
     div.container-fluid
       div.navbar-header
-        a.navbar-brand(href='/') My Amazing App
+        a.navbar-brand(href='/') JS Gaming
       ul.nav.navbar-nav
         li
-            a(href="/") home
-          li
-            a(href="/collections") collection demo
-          li
-            a(href="/info") more info
+          a(href="/") chat
+        li
+          a(href="/info") more info
+      div.pull-right
+          strong Welcome, 
+          strong(data-hook="name")
   .container
     main(data-hook="page-container")

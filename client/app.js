@@ -1,5 +1,5 @@
 /*global app, me, $*/
-var _ = require('underscore');
+var _ = require('lodash');
 var logger = require('andlog');
 var config = require('clientconfig');
 
@@ -7,7 +7,7 @@ var Router = require('./router');
 var tracking = require('./helpers/metrics');
 var MainView = require('./views/main');
 var Me = require('./models/me');
-var People = require('./models/persons');
+var Messages = require('./models/messages');
 var domReady = require('domready');
 
 
@@ -16,9 +16,11 @@ module.exports = {
     blastoff: function () {
         var self = window.app = this;
 
-        // create our global 'me' object and an empty collection for our people models.
-        window.me = new Me();
-        this.people = new People();
+        // create our global 'me' object and an empty collection for our message models.
+        window.me = new Me({
+            username: 'airandfingers'
+        });
+        this.messages = new Messages();
 
         // init our URL handlers and the history tracker
         this.router = new Router();

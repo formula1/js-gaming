@@ -5,13 +5,12 @@
 // This view also handles all the 'document' level events such as keyboard shortcuts.
 var View = require('ampersand-view');
 var ViewSwitcher = require('ampersand-view-switcher');
-var _ = require('underscore');
+var _ = require('lodash');
 var domify = require('domify');
 var dom = require('ampersand-dom');
 var templates = require('../templates');
 var tracking = require('../helpers/metrics');
 var setFavicon = require('favicon-setter');
-
 
 module.exports = View.extend({
     template: templates.body,
@@ -21,6 +20,9 @@ module.exports = View.extend({
     },
     events: {
         'click a[href]': 'handleLinkClick'
+    },
+    bindings: {
+        'model.fullName': '[data-hook~=name]'
     },
     render: function () {
         // some additional stuff we want to add to the document head
@@ -33,7 +35,7 @@ module.exports = View.extend({
         this.pageSwitcher = new ViewSwitcher(this.queryByHook('page-container'), {
             show: function (newView, oldView) {
                 // it's inserted and rendered for me
-                document.title = _.result(newView, 'pageTitle') || 'My Amazing App';
+                document.title = _.result(newView, 'pageTitle') || 'JS Gaming';
                 document.scrollTop = 0;
 
                 // add a class specifying it's active
