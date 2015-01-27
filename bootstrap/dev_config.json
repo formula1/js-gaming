@@ -15,5 +15,11 @@
     "client": {
         "apiUrl": "http://localhost:3000",
         "debugMode": true
+    },
+    "passport": {
+      "twitter":{
+        "key":"fake",
+        "secret":"not a secret"
+      }
     }
 }

@@ -3,7 +3,6 @@ var path = require('path');
 var express = require('express');
 var helmet = require('helmet');
 var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
 var Moonboots = require('moonboots-express');
 var compress = require('compression');
 var config = require('getconfig');
@@ -11,6 +10,7 @@ var semiStatic = require('semi-static');
 var serveStatic = require('serve-static');
 var stylizer = require('stylizer');
 var templatizer = require('templatizer');
+var session = require("express-session");
 var app = express();
 
 // a little helper for fixing paths for various environments
@@ -18,6 +18,8 @@ var fixPath = function (pathString) {
     return path.resolve(path.normalize(pathString));
 };
 
+var user = require(__root+"/models/user");
+var messages = require(__root+"/models/message");
 // -----------------
 // Configure express
 // -----------------
@@ -30,9 +32,18 @@ if (config.isDev) {
     app.use(serveStatic(fixPath('test/spacemonkey')));
 }
 
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// -----------------
+// Enable Sessions and cookies
+// -----------------
+app
+.use(require("cookie-parser")(config.session.secret))
+.use(bodyParser.urlencoded({ extended: false }))
+.use(bodyParser.json())
+.use(session({
+  secret: config.session.secret,
+  store: new session.MemoryStore()
+}));
+user.middleware(app);
 
 // in order to test this with spacemonkey we need frames
 if (!config.isDev) {
@@ -46,12 +57,9 @@ app.set('view engine', 'jade');
 // -----------------
 // Set up our little demo API
 // -----------------
-var api = require('./fakeApi');
-app.get('/api/messages', api.list);
-app.get('/api/messages/:id', api.get);
-app.delete('/api/messages/:id', api.delete);
-app.put('/api/messages/:id', api.update);
-app.post('/api/messages', api.add);
+var api = require(__root+'/abstract/fakeApi');
+app.use('/api', api.router);
+app.use('/auth', user.router);
 
 // -----------------
 // Enable the functional test site in development
