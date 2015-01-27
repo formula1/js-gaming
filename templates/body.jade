@@ -8,8 +8,13 @@ body
           a(href="/") chat
         li
           a(href="/info") more info
+        li
+          if user
+            a(href="/auth/logout") Log Out
+          else
+            a(href="/auth/login") Log In
       div.pull-right
-          strong Welcome, 
+          strong Welcome,
           strong(data-hook="name")
   .container
     main(data-hook="page-container")

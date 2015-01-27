@@ -6,7 +6,7 @@ module.exports.middleware = function(app){
   .use(setup.passport.session())
   .use(function(req,res,next){
     res.locals.user = req.user;
-    res.locals.logins= setup.authTypes;
+    res.locals.authTypes= setup.authTypes;
     next();
   })
   ;
