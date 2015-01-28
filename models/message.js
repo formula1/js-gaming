@@ -1,5 +1,15 @@
-var fakeAPI = require(__root+"/abstract/fakeApi");
+var mongoose = require("mongoose");
+var Schema = mongoose.Schema;
+var moment = require("moment");
 
-var Message = fakeAPI.addClass("messages");
+var MessageSchema = new Schema({
+    sender: {type:String, required:true},
+    message: {type:String, required:true},
+    timestamp: {type:Date, required:true, default:Date.now }
+});
 
-module.exports = Message;
+MessageSchema.virtual("readableTimeStamp", function(){
+  return moment(this.timestamp).fromNow();
+});
+
+module.exports = mongoose.model("messages",MessageSchema);

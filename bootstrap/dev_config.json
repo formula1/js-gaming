@@ -21,5 +21,13 @@
         "key":"fake",
         "secret":"not a secret"
       }
+    },
+    "mongodb": {
+      "hostname":"localhost",
+      "port":27017,
+      "database":"jsgaming",
+      "options":{
+        "safe":true
+      }
     }
 }

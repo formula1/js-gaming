@@ -49,7 +49,7 @@ router.param("authtype",function(req,res,next){
       //        req.flash("info", info);
       res.statusCode = 201;
       res.redirect("/login");
-    })
+    });
   })(req,res,next);
 });
 

@@ -57,7 +57,7 @@ app.set('view engine', 'jade');
 // -----------------
 // Set up our little demo API
 // -----------------
-var api = require(__root+'/abstract/fakeApi');
+var api = require(__root+'/abstract/mongooseAPI');
 app.use('/api', api.router);
 app.use('/auth', user.router);
 

@@ -1,14 +1,7 @@
 var passport = require("passport");
 var fs = require("fs");
-var FakeAPI = require(__root+"/abstract/fakeApi");
 
-var User = FakeAPI.addClass("user",function(data){
-  if(!/string|undefined/.test(typeof data.displayName)) return false;
-  if(!data.displayName) data.displayName = "Anonymous"+Date.now();
-  data.loggedIn = false;
-  return data
-});
-
+var User = require("./User");
 var possible = [];
 (function(){
   var ari = fs.readdirSync(__dirname+"/types");
@@ -24,12 +17,12 @@ var possible = [];
 })();
 
 passport.serializeUser(function(user, next){
-  if(user && user.id) return next(void(0), user.id);
+  if(user && user._id) return next(void(0), user._id);
   next(new Error("no user"));
 });
 
 passport.deserializeUser(function(id, next){
-  next(void(0), User.get(id));
+  Use.findOne({_id:id},next);
 });
 
 module.exports.User = User;
