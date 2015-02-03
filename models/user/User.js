@@ -18,7 +18,7 @@ var UserSchema = new Schema({
   }
 });
 
-UserSchema.virtual("fullname", function(){
+UserSchema.virtual("fullname").get(function(){
   var fullName;
   if (_.isEmpty(this.firstName) && _.isEmpty(this.lastName)) {
     fullName = 'Stranger';
@@ -32,6 +32,11 @@ UserSchema.virtual("fullname", function(){
   return fullName;
 });
 
+UserSchema.static("Permission", function(req,next){
+  if(!req.user) return next(false);
+  if(req.user.groups != "admin") return next(false);
+  next(true);
+});
 
 
 module.exports = mongoose.model("user", UserSchema);

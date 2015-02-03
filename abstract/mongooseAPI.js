@@ -28,6 +28,13 @@ router.param('method', function(req, res, next, method){
   next();
 });
 
+router.use(function(req,res,next){
+  if(!req.mClass.Permission) return next();
+  req.mClass.Permission(req,function(boo){
+    if(!boo) return res.status(403).end();
+    next();
+  });
+});
 router.get("/:classname",function(req,res){
   var ipp = 10;
   if(req.query.ipp){
