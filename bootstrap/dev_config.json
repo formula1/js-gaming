@@ -9,8 +9,12 @@
         "secure": false
     },
     "http": {
-        "listen": "localhost",
+        "host": "localhost",
         "port": 3000
+    },
+    "websocket": {
+      "host": "localhost",
+      "port": 4180
     },
     "client": {
         "apiUrl": "http://localhost:3000",

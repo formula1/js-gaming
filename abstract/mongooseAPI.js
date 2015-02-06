@@ -28,7 +28,7 @@ router.param('method', function(req, res, next, method){
   next();
 });
 
-router.use(function(req,res,next){
+router.use(["/:classname","/:classname/*"],function(req,res,next){
   if(!req.mClass.Permission) return next();
   req.mClass.Permission(req,function(boo){
     if(!boo) return res.status(403).end();

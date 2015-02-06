@@ -15,6 +15,10 @@ var UserSchema = new Schema({
   loggedIn: {
     type: Boolean,
     default: true
+  },
+  provider: {
+    type: String,
+    enum: ["local","persona","twitter"]
   }
 });
 
@@ -39,4 +43,4 @@ UserSchema.static("Permission", function(req,next){
 });
 
 
-module.exports = mongoose.model("user", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

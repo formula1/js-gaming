@@ -7,10 +7,11 @@ var config = require('getconfig');
 var serveStatic = require('serve-static');
 var session = require("express-session");
 var app = express();
+var url = require("url");
 
 // a little helper for fixing paths for various environments
 var fixPath = function (pathString) {
-    return path.resolve(path.normalize(pathString));
+  return path.resolve(path.normalize(pathString));
 };
 
 var user = require(__root+"/models/user");
@@ -24,22 +25,18 @@ app.use(serveStatic(fixPath('public')));
 
 // we only want to expose tests in dev
 if (config.isDev) {
-    app.use(serveStatic(fixPath('test/assets')));
-    app.use(serveStatic(fixPath('test/spacemonkey')));
+  app.use(serveStatic(fixPath('test/assets')));
+  app.use(serveStatic(fixPath('test/spacemonkey')));
 }
 
 // -----------------
 // Enable Sessions and cookies
 // -----------------
 app
-.use(require("cookie-parser")(config.session.secret))
+.use(require("./generic_router"))
 .use(bodyParser.urlencoded({ extended: false }))
 .use(bodyParser.json())
-.use(session({
-  secret: config.session.secret,
-  store: new session.MemoryStore()
-}));
-user.middleware(app);
+.use(user.renderware);
 
 // ----------------
 // MiddleWare for Tests
@@ -76,29 +73,3 @@ test.routes(app);
 // listen for incoming http requests on the port as specified in our config
 app.listen(config.http.port);
 console.log('HTTP is running at: http://localhost:' + config.http.port + '.');
-
-
-var http = require('http'),
-websocket = require('websocket-driver');
-
-var server = http.createServer();
-
-server.on('upgrade', function(request, socket, body) {
-  if (!websocket.isWebSocket(request)) return;
-  console.log(request);
-
-  var driver = websocket.http(request);
-
-  driver.io.write(body);
-  socket.pipe(driver.io).pipe(socket);
-
-  driver.messages.on('data', function(message) {
-    console.log('Got a message', message);
-  });
-
-  driver.start();
-});
-
-server.listen(config.websocket.port);
-
-console.log('WebSocket Server is running at: http://localhost:' + config.websocket.port + '.');

@@ -4,6 +4,7 @@ var setup = require("./setup");
 
 
 var User = require(__dirname+"/User.js");
+var UserProvider;
 
 var UserProviderSchema = new Schema({
   profile_id:{
@@ -21,10 +22,11 @@ var UserProviderSchema = new Schema({
     index:true
   },
   token: String,
-  token_secret: String
+  token_secret: String,
+  pass: String
 });
 
-UserProviderSchema.statics.applyToUser = function(user, token, tokenSecret, profile, next){
+UserProviderSchema.static("applyToUser",function(user, token, tokenSecret, profile, next){
   UserProvider
   .findOne({identity:profile.provider+"-"+profile.id})
   .populate('user')
@@ -40,40 +42,55 @@ UserProviderSchema.statics.applyToUser = function(user, token, tokenSecret, prof
       profile_id: profile.provider+"-"+profile.id,
       user: user,
       token: token,
-      tokenSecret: tokenSecret
+      tokenSecret: tokenSecret,
+      pass: profile.password
     }, function(err, provider){
-      if(err) next(err);
-      next(void(0), user);
+      user.provider = profile.provider;
+      user.save(function(err){
+        next(err,provider.user,provider);
+      });
     });
   });
-};
+});
 
-UserProviderSchema.statics.findUserOrCreate = function(token, tokenSecret, profile, next){
+UserProviderSchema.static("findOrCreateUser",function(token, tokenSecret, profile, next){
   UserProvider
-  .findOne({identity:profile.provider+"-"+profile.id})
+  .findOne({profile_id:profile.provider+"-"+profile.id})
   .populate('user')
   .exec(function(err,provider){
     if(err) return next(err);
-    if(provider) return next(void(0),provider.user);
+    if(provider){
+      console.log("found a provider");
+      if(provider.pass){
+        if(provider.pass != profile.password)
+          return next("passwords are incorrect");
+      }
+      provider.user.provider = profile.provider;
+      provider.user.save(function(err){
+        next(err,provider.user,provider);
+      });
+      return;
+    }
     console.log("create user");
     User.create({
-      name: profile.displayName,
-      associated: ["UserProvider"]
+      username: profile.displayName,
+      provider:profile.provider
     }, function(err, user){
       if(err) return next(err);
       UserProvider.create({
         provider: profile.provider,
-        identity: profile.provider+"-"+profile.id,
+        profile_id: profile.provider+"-"+profile.id,
         user: user,
         token: token,
-        tokenSecret: tokenSecret
-      },function(err){
+        tokenSecret: tokenSecret,
+        pass: profile.password
+      },function(err,provider){
         if(err) return next(err);
-        return next(void(0),user);
+        return next(void(0),user,provider);
       });
     });
   });
-};
+});
 
 UserProviderSchema.post('remove', function (doc) {
   UserProvider.find({user:doc.user}, function(err,docs){
@@ -91,4 +108,6 @@ User.schema.post('remove', function(doc){
   });
 });
 
-module.exports = mongoose.model('_UserProvider', UserProviderSchema);
+UserProvider = mongoose.model('_UserProvider', UserProviderSchema);
+
+module.exports = UserProvider;

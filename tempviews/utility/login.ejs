@@ -1,0 +1,48 @@
+<script type="text/javascript">
+jQuery(function($){
+  $(".persona.login").click(function(e){
+    e.preventDefault();
+  });
+  $('.logout').click(function(e){
+    if(window.User.provider == "persona"){
+      e.preventDefault();
+    }
+  });
+});
+</script>
+
+<%
+if(user){
+%>
+  <script type="text/javascript">
+    window.User = <%-JSON.stringify(user)%>;
+    window.onload = function(){
+      var url = new URL(document.URL);
+      var socket = new WebSocket("ws://"+url.hostname+":"+4180+"/poop");
+    }
+  </script>
+  <h3>Hello <%=user.username%></h3>
+  <a class="logout" href="/auth/logout">Logout</a>
+<%
+}else{
+  console.log("no user");
+%><h5>Login</h5>
+  <ul><%
+  for(var i in authTypes){
+    %><li><%
+    console.log(i);
+    if(authTypes[i].html){
+      %><%-authTypes[i].html%></li><%
+      continue;
+    }
+    %><a class="login <%=i%>" href="/auth/<%=i%>/login" ><%
+    if(authTypes[i].icon){
+      %><img src='/auth/<%=i%>/icon' title='Login with <%=i%>' /><%
+    }else{
+      %><%=i%><%
+    }
+    %></a></li><%
+  }
+%></ul><%
+}
+%>
