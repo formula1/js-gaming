@@ -1,0 +1,89 @@
+
+
+function Player(){
+
+}
+
+util.inherits(Player, EventEmitter);
+
+function SyncronizerServer(){
+	// Syncronizes Random Integers, events emitted from players and the game and timed events
+}
+
+function Game(){
+	// recieves events from the player and then does stuff with it
+}
+
+function GameWebRTCProxy(dataconnection){
+	//Emits events to each player, however...
+	// the time it gets activated is offset to compensate for lag
+	// random's are tracked by all players
+
+}
+
+function GameWebSocketProxy(url){
+	//Emits events to a server, however...
+	// the server is in control of when the event gets activated
+	// randoms are tracked by the server
+}
+
+function RemoteGameViewer(blobURL){
+	// Takes a remote url that sends Image Messages
+	// All gameplay and rendering is done on the server and sent over the internet
+}
+
+function LocalGameViewer(ui,Game){
+	// Takes a game and renders it to a UI
+}
+
+
+function Player(Game){
+	//Emits events that the game can understand
+}
+
+function ProxyPlayer(messageDuplexA, messageDuplexB){
+	//Sends player Events from duplex A to duplex B
+}
+
+function GamePadPlayer(gamepad,Game){
+	//Sends player events from a gamepad after it has been binded properly
+}
+
+function UIPlayer(ui,Game){
+	//sends player events from a user interface that has been binded properly
+}
+
+
+
+Possible Flows
+
+Local Game
+	-Players have a local game
+	-Players render the game locally
+	-Players connect to the Game via gamepad
+	-Players send events directly to the game
+
+Peer to Peer routing
+	-Players have a local game
+	-Players render the game locally
+	-Players connect to eachother via webRTC
+	-Players send eachother player events, timed events and randoms based off eachothers lag
+
+Server routing
+	-Players have a local game
+	-Players render the game locally
+	-Players send events to the server
+	-Server sends to each local game player events, timed events and randoms
+
+Server Game
+	-Server has the game
+	-Players render the game locally
+	-Players send events to the server
+	-Server sends to each local renderer objects to render
+
+Server Renderer
+	-Server has the game
+	-Server renders the game
+	-Players send events to the server
+	-Server sends to each local video player images to render
+

@@ -1,0 +1,113 @@
+function Client2Client_com(nethost, target){
+  MessageDuplex.call(this, function(message){
+		message.identity = this.target;
+    this.channel.send(JSON.stringify(message));
+	}.bind(this));
+	this.target = target;
+  this.nethost = nethost;
+  this.pconn = new RTCPeerConnection(nethost.config,{
+    optional: [
+        {DtlsSrtpKeyAgreement: true},
+        {RtpDataChannels: true}
+    ]
+	});
+  this.pconn.onicecandidate = this.iceCB.bind(this);
+  Object.defineProperty(this, "state", {
+    get: function(){
+      if(!this.pconn.localDescription)
+        return "dormant";
+    }
+  });
+}
+NetworkInstance.prototype = Object.create(MessageDuplex.prototype);
+NetworkInstance.prototype.constructor = NetworkInstance;
+
+NetworkInstance.prototype.offer = function(identity,cb){
+	this.target = identity;
+  this.registerChannel(this.pconn.createDataChannel("sendDataChannel",this.nethost.sconfig));
+  var that = this;
+  this.pconn.createOffer(function(desc){
+    that.pconn.setLocalDescription(desc, function () {
+      that.nethost.RTCHandle.send({
+        cmd:"offer",
+        identity:identity,
+        desc:that.pconn.localDescription
+      });
+      cb(void(0),that);
+    }, cb);
+  }, cb);
+};
+
+NetworkInstance.prototype.registerChannel = function(channel){
+	var that = this;
+	this.channel = channel;
+  this.channel.onmessage = function(event){
+    var message;
+		try{
+		   message = JSON.parse(event.data);
+		}catch(e){
+		  event.target.close();
+			return;
+		}
+    that.handleMessage(message,event.target);
+	};
+	this.channel.onopen = function(){
+    that.ready();
+  };
+  this.channel.onclose = this.emit.bind(this,"close");
+};
+/**
+  Accepts a webrtc offer from another party
+  @memberof NetwokInstance
+  @param {object} message - the original message from the other party
+  @param {netCallback} cb
+*/
+NetworkInstance.prototype.accept = function(message,cb){
+  var that = this;
+  this.pconn.ondatachannel = function (event) {
+      that.registerChannel(event.channel);
+  };
+  this.pconn.setRemoteDescription(new RTCSessionDescription(message.desc),function(){
+    that.pconn.createAnswer(function(desc){
+      that.pconn.setLocalDescription(desc, function () {
+        that.nethost.RTCHandle.send({
+          cmd:"accept",
+          identity:message.identity,
+          desc:that.pconn.localDescription
+        });
+        cb(void(0),that);
+      }, cb);
+    }, cb);
+  },cb);
+};
+
+/**
+  Solidifies a webrtc connection after the other party accepts
+  @memberof NetwokInstance
+  @param {object} message - the original message from the other party
+*/
+NetworkInstance.prototype.ok = function(message){
+  this.pconn.setRemoteDescription(new RTCSessionDescription(message.desc));
+};
+
+NetworkInstance.prototype.remoteIce = function(message){
+  this.pconn.addIceCandidate(new RTCIceCandidate({
+      sdpMLineIndex: message.label,
+      candidate: message.candidate
+  }));
+};
+
+NetworkInstance.prototype.iceCB = function(event){
+  if (!event.candidate)
+    return;
+  this.nethost.RTCHandle.send({
+    cmd:"ice",
+    identity:this.target,
+		data:{
+	    type: 'candidate',
+	    label: event.candidate.sdpMLineIndex,
+	    id: event.candidate.sdpMid,
+	    candidate: event.candidate.candidate
+		}
+	});
+};

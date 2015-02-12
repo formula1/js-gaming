@@ -1,0 +1,15 @@
+{
+  "name": "rps",
+  "version": "0.1.0",
+  "description": "Rock Paper Scissors for js-gaming",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sam Tobia",
+  "license": "ISC",
+  "dependencies": {
+    "jQuery": "^1.7.4",
+    "jquery": "^2.1.3"
+  }
+}

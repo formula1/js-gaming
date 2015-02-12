@@ -1,104 +1,55 @@
-/* global console */
-var path = require('path');
-var express = require('express');
-var bodyParser = require('body-parser');
-var compress = require('compression');
-var config = require('getconfig');
-var serveStatic = require('serve-static');
-var session = require("express-session");
-var app = express();
+var config = require("getconfig");
+require("./polyfill");
 
-// a little helper for fixing paths for various environments
-var fixPath = function (pathString) {
-    return path.resolve(path.normalize(pathString));
-};
+var database = require("./database")(config);
+var appserver = require("./apps")();
+var userserver = require("./user");
+var httpserver = require("./httpserver");
+var wsserver = require("./wsserver");
 
-var user = require(__root+"/models/user");
-var messages = require(__root+"/models/message");
-var test = require(__dirname+"/test");
-// -----------------
-// Configure express
-// -----------------
-app.use(compress());
-app.use(serveStatic(fixPath('public')));
-
-// we only want to expose tests in dev
-if (config.isDev) {
-    app.use(serveStatic(fixPath('test/assets')));
-    app.use(serveStatic(fixPath('test/spacemonkey')));
-}
-
-// -----------------
-// Enable Sessions and cookies
-// -----------------
-app
-.use(require("cookie-parser")(config.session.secret))
-.use(bodyParser.urlencoded({ extended: false }))
-.use(bodyParser.json())
-.use(session({
-  secret: config.session.secret,
-  store: new session.MemoryStore()
-}));
-user.middleware(app);
-
-// ----------------
-// MiddleWare for Tests
-// ----------------
-
-test.middleware(app);
-
-//app.set('view engine', 'jade');
-app.engine('jade', require('jade').__express);
-app.engine('ejs', require('ejs').renderFile);
-app.set('view engine', 'ejs');
-app.set('views', __root+"/tempviews");
-
-// -----------------
-// Set up our little demo API
-// -----------------
-var api = require(__root+'/abstract/mongooseAPI');
-app.use('/api', api.router);
-app.use('/auth', user.router);
-
-// ----------------
-// Temporary Router
-// ----------------
-
-app.use('/temp', require(__root+"/abstract/temporaryRouter"));
-
-// ----------------
-// Routes for Tests
-// ----------------
-
-test.routes(app);
-
-
-// listen for incoming http requests on the port as specified in our config
-app.listen(config.http.port);
-console.log('HTTP is running at: http://localhost:' + config.http.port + '.');
-
-
-var http = require('http'),
-websocket = require('websocket-driver');
-
-var server = http.createServer();
-
-server.on('upgrade', function(request, socket, body) {
-  if (!websocket.isWebSocket(request)) return;
-  console.log(request);
-
-  var driver = websocket.http(request);
-
-  driver.io.write(body);
-  socket.pipe(driver.io).pipe(socket);
-
-  driver.messages.on('data', function(message) {
-    console.log('Got a message', message);
+database.collect(function(e,mongo){
+  if(e) throw e;
+  mongo.connection.on("disconnection", function(){
+    console.error(arguments);
+    throw new Error("mongo disconnected");
   });
+  mongo.connection.on("error", function(e){
+    console.error(e);
+    throw e;
+  });
+  console.log("Database finished");
+  userserver = userserver();
+  userserver.collect(function(e,providers){
+    if(e) throw e;
+    console.log("UserServer finished");
+    appserver.collect(function(e,applist){
+      if(e) throw e;
+      console.log("AppServer finished");
+      var test = require("./httpserver/test");
 
-  driver.start();
+      // -----------------
+      // Enable Sessions and cookies
+      // -----------------
+      httpserver
+      .use(userserver.middleware)
+      .use(appserver.renderware)
+      .use(userserver.renderware);
+      test.middleware(httpserver);
+
+      // listen for incoming http requests on the port as specified in our config
+      httpserver
+      .use("/games",appserver.router)
+      .use("/api",database.router)
+      .use("/auth",userserver.router)
+      .use('/temp', require(__root+"/abstract/temporaryRouter"));
+      test.routes(httpserver);
+
+      httpserver.listen(config.http.port);
+      console.log('HTTP is running at: http://localhost:' + config.http.port + '.');
+
+      wsserver.router.use(userserver.middleware);
+      wsserver.listen(config.websocket.port);
+      console.log('WebSocket Server is running at: http://localhost:' + config.websocket.port + '.');
+    });
+  });
 });
-
-server.listen(config.websocket.port);
-
-console.log('WebSocket Server is running at: http://localhost:' + config.websocket.port + '.');

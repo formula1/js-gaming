@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css" >
+    .login-container>li{
+      display:inline-block;
+    }
+    </style>
+  </head>
+  <body>
+    <%-include("header.ejs") %>
+    <iframe src="/apps/<%-req.theApp.name%>/public" ></iframe>
+    <%-include("footer.ejs") %>
+  </body>
+</html>

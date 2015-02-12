@@ -1,0 +1,31 @@
+We want to start a game server
+1) The system starts up
+2) Start each games serverside logic if it exists
+3) Wait for a person to request a match
+
+Player Wants to Play a game
+1) A person chooses a game
+  -If Game is
+    -Multiplayer-go to "Multiplayer"
+    -Singleplayer-go to "Play"
+
+Multiplayer
+1) Player can choose
+  -Ranked-The Game chooses their match for them
+  -Rooms-Player can create a room or search for a room
+2Ranked) When a Match is created, go to play
+2Rooms) When the creator says start, go to play
+
+Play
+1) Webpage - Display our template
+2) Webpage - Load up the game's html in an iframe
+3) Webpage - Connect to the iframe with our template - what for?
+  -Fullscreen?
+  -Javascript Ajax page loading
+  -For Bubbling Error Events
+  -For Emitting Boot Events
+4) Server/Iframe - Ensure all players are loaded and ready
+5) Server/Iframe - Start Game
+
+InGame
+

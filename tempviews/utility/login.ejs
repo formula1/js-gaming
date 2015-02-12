@@ -25,21 +25,24 @@ if(user){
   <a class="logout" href="/auth/logout">Logout</a>
 <%
 }else{
+  console.log(locals);
   console.log("no user");
 %><h5>Login</h5>
   <ul><%
-  for(var i in authTypes){
+  var l = authTypes.length;
+  while(l--){
+    var provider = authTypes[l];
     %><li><%
-    console.log(i);
-    if(authTypes[i].html){
-      %><%-authTypes[i].html%></li><%
+    console.log(provider);
+    if(provider.html){
+      %><%-provider.html%></li><%
       continue;
     }
-    %><a class="login <%=i%>" href="/auth/<%=i%>/login" ><%
-    if(authTypes[i].icon){
-      %><img src='/auth/<%=i%>/icon' title='Login with <%=i%>' /><%
+    %><a class="login <%=provider.name%>" href="/auth/<%=provider.name%>/login" ><%
+    if(provider.icon){
+      %><img src='/auth/<%=provider.name%>/icon' title='Login with <%=provider.name%>' /><%
     }else{
-      %><%=i%><%
+      %><%=provider.name%><%
     }
     %></a></li><%
   }

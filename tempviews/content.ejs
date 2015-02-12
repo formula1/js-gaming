@@ -1,3 +1,9 @@
 <div>
   <h3>this is the content</h3>
+  <%
+    var l = appsList.length;
+    while(l--){
+      %><a href="/games/<%=appsList[l].name%>"><%=appsList[l].name%></a><%
+    }
+  %>
 </div>
