@@ -1,15 +1,18 @@
-
-module.exports.scripts = ["https://login.persona.org/include.js"];
-
-module.exports.onLogout = function(){
-  navigator.id.logout();
-};
-
-module.exports.onLogin = function(){
+var $ = require("jquery");
+$(".persona.login").click(function(e){
+  e.preventDefault();
   navigator.id.request();
-};
+});
 
-module.exports.onLoad = function(){
+$('.logout').click(function(e){
+  if(window.User.provider == "persona"){
+    e.preventDefault();
+    navigator.id.logout();
+  }
+});
+
+
+$.getScript("https://login.persona.org/include.js").done(function(){
   navigator.id.watch({
     loggedInUser: window.profile.id,
     onlogin: function(assertion) {
@@ -28,4 +31,4 @@ module.exports.onLoad = function(){
       window.location.replace("/auth/logout");
     }
   });
-};
+});

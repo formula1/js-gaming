@@ -38,7 +38,7 @@ database.collect(function(e,mongo){
 
       // listen for incoming http requests on the port as specified in our config
       httpserver
-      .use("/games",appserver.router)
+      .use("/apps",appserver.router)
       .use("/api",database.router)
       .use("/auth",userserver.router)
       .use('/temp', require(__root+"/abstract/temporaryRouter"));

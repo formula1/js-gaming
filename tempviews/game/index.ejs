@@ -8,8 +8,8 @@
     </style>
   </head>
   <body>
-    <%-include("header.ejs") %>
-    <iframe src="/apps/<%-req.theApp.name%>/public" ></iframe>
-    <%-include("footer.ejs") %>
+    <%-include("../header.ejs") %>
+    <iframe src="/apps/<%-theApp.name%>/public" ></iframe>
+    <%-include("../footer.ejs") %>
   </body>
 </html>

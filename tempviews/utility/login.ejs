@@ -1,16 +1,3 @@
-<script type="text/javascript">
-jQuery(function($){
-  $(".persona.login").click(function(e){
-    e.preventDefault();
-  });
-  $('.logout').click(function(e){
-    if(window.User.provider == "persona"){
-      e.preventDefault();
-    }
-  });
-});
-</script>
-
 <%
 if(user){
 %>
@@ -25,7 +12,6 @@ if(user){
   <a class="logout" href="/auth/logout">Logout</a>
 <%
 }else{
-  console.log(locals);
   console.log("no user");
 %><h5>Login</h5>
   <ul><%
@@ -33,7 +19,6 @@ if(user){
   while(l--){
     var provider = authTypes[l];
     %><li><%
-    console.log(provider);
     if(provider.html){
       %><%-provider.html%></li><%
       continue;
