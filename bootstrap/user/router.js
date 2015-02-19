@@ -55,7 +55,7 @@ module.exports.router = function(provider){
     req.user.save(function(err){
       if(err) return next(err);
       req.logout();
-      res.redirect('/login');
+      res.redirect(req.baseUrl+'/login');
     });
   }).get('/:authtype',function(req,res,next){
 
@@ -73,12 +73,12 @@ module.exports.router = function(provider){
     }
     passport.authenticate(req.params.authtype,function(err,user,info){
       if(err) return next(err);
-      if(!user) return res.redirect('/login');
+      if(!user) return res.redirect(req.baseUrl+'/login');
       user.loggedIn = true;
       req.logIn(user, function(err){
         if(err) return next(err);
         res.statusCode = 201;
-        res.redirect("/login");
+        res.redirect(req.baseUrl+"/login");
       });
     })(req,res,next);
   });

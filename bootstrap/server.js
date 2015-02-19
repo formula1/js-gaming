@@ -4,6 +4,7 @@ require("./polyfill");
 var database = require("./database")(config);
 var appserver = require("./apps")();
 var userserver = require("./user");
+var matchmaker = require("./matchmaker");
 var httpserver = require("./httpserver");
 var wsserver = require("./wsserver");
 
@@ -25,12 +26,23 @@ database.collect(function(e,mongo){
     appserver.collect(function(e,applist){
       if(e) throw e;
       console.log("AppServer finished");
+
+      matchmaker = matchmaker();
       var test = require("./httpserver/test");
 
       // -----------------
       // Enable Sessions and cookies
       // -----------------
       httpserver
+      .use(function(req,res,next){
+        res.locals.routePaths = {
+          apps:"/apps",
+          api:"/api",
+          user:"/auth",
+          match:"/match",
+          index:"/temp",
+        };
+      })
       .use(userserver.middleware)
       .use(appserver.renderware)
       .use(userserver.renderware);
@@ -41,6 +53,7 @@ database.collect(function(e,mongo){
       .use("/apps",appserver.router)
       .use("/api",database.router)
       .use("/auth",userserver.router)
+      .use("/match",matchmaker.router)
       .use('/temp', require(__root+"/abstract/temporaryRouter"));
       test.routes(httpserver);
 

@@ -17,6 +17,9 @@ function generic(prefix, argus, suffix){
   return args;
 }
 
+global.RegExp.escape= function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
 var _debug = console.debug;
 console.debug = function(){

@@ -1,0 +1,26 @@
+<div class="array-view path-<%=path.name%>" >
+<%
+  var temppath ={
+      instance:"number",
+      name:path.name+".length"
+    };
+%>
+  <header class="length">Length: <%
+    include("./number",{path:temppath,value:value.length})
+  %></header>
+  <ul class="items"><%
+      for(var i=0, l=value.length; i < l; i++){
+        temppath = {
+          instance:path.caster.instance,
+          options:path.caster.options,
+          name:path.name+"."+i
+        };
+      %><li class="item-<%=i%>"><%
+        include(
+          "./"+path.caster.instance.toLowerCase(),
+          {path:temppath, value:value[i]}
+        )
+      %></li><%
+      }
+%></ul>
+</div>

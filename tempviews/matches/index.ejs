@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <%-include("../head.ejs")%>
+  </head>
+  <body>
+    <%-include("../header.ejs") %>
+    <ul><%
+      var l = matches.length;
+      while(l--){
+      %><li>
+        <a href="/match/<%-matches[l]._id%>">
+          <%=matches[l].advertisement%>
+        </a>
+      </li><%
+      }
+    %></ul>
+    <%-include("../footer.ejs") %>
+  </body>
+</html>
