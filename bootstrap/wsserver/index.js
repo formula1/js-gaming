@@ -7,7 +7,7 @@ var express = require("express");
 var router = express.Router();
 server.on('upgrade', function(request, socket, body) {
   if (!websocket.isWebSocket(request)) return;
-  console.log(request);
+  //console.log(request);
   router(request,{},function(err){
     if(err) return socket.end();
     var uri = url.parse(request.url);
