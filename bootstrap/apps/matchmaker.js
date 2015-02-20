@@ -83,24 +83,26 @@ MatchMaker.prototype.checkForMatch = function(){
 
 MatchMaker.prototype.needPlayer = function(matchInfo, game){
   game = _.findOne(this.games, {name:game});
-  var l = this.waitingPlayers.length;
+  var l = this.waiting_players.length;
   if(l){
     for(var i=0;i<l;i++){
-      if(_.matches(this.waitingPlayers[l].query.game)(game)){
-        return game.sendPlayerToMatch(this.waitingPlayers.splice(l,1),match);
+      if(_.matches(this.waiting_players[l].query.game)(game)){
+        var user = this.waiting_players[l];
+        this.removePlayer(this.waiting_players[l]);
+        return game.sendPlayerToMatch(user,match);
       }
     }
   }
-  var index = _.indexOf(_.pluck(this.needingPlayers,"id"),id);
+  var index = _.indexOf(_.pluck(this.needing_players,"id"),id);
   if(index == -1){
-    this.needingPlayers.push({
+    this.needing_players.push({
       id:matchInfo.id,
       matchInfo:matchInfo,
       game:game,
       needs:1
     });
   }else{
-    this.needingPlayers[index].number++;
+    this.needing_players[index].number++;
   }
 };
 
