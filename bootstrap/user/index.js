@@ -1,11 +1,12 @@
-var passport = require("passport");
-var fs = require("fs");
-var browserify = require("browserify");
 var async = require("async");
-var mime = require("mime");
-var mongoose = require("mongoose");
-var Strategy = require("passport-strategy");
+var cbpr = require(__root+"/abstract/utility/cbpromise");
+var fs = require("fs");
+
+var passport = require("passport");
+var browserify = require("browserify");
+
 var factory = require("./factory");
+
 
 function ProviderCompiler(directory,options){
   if (!(this instanceof ProviderCompiler)){
@@ -24,6 +25,7 @@ function ProviderCompiler(directory,options){
 }
 
 ProviderCompiler.prototype.collect = function(next){
+  var cbret = cbpr(this,next);
   var _this = this;
   this.clientAPI = browserify();
   fs.readdir(this.directory,function(err,types){
@@ -37,10 +39,10 @@ ProviderCompiler.prototype.collect = function(next){
         }
         passport.use(ret.provider);
         _this.providers.push(ret);
-        if(ret.client && ret.client.api){
+        if(ret.browser){
           console.log("adding to bundle: "+ret.name);
           _this.clientAPI.require(
-            ret.client.api,
+            ret.browser,
             {expose:"auth-"+ret.name}
           );
         }
@@ -51,10 +53,11 @@ ProviderCompiler.prototype.collect = function(next){
       _this.clientAPI.bundle(function(err,buff){
         if(err) next(err);
         _this.clientAPI = buff;
-        next(void(0),_this.providers);
+        cbret.cb(void(0),_this.providers);
       });
     });
   });
+  return cbret.ret;
 };
 
 module.exports = ProviderCompiler;

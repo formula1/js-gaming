@@ -32,7 +32,7 @@ module.exports = function(ob){
   });
   router.get("/:appname/client.js", function(req,res,next){
     res.status(200).setHeader('content-type', 'application/javascript');
-    res.send(req.theApp.client);
+    res.send(req.theApp.browser);
   });
   /*
   router.ws("/:appname",function(req,res,next){

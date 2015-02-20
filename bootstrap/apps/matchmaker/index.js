@@ -38,7 +38,7 @@ function MatchMaker(games){
 
 MatchMaker.prototype.addUser = function(user,query,next){
   var _this = this;
-  var games = query.game?_.filter(this.games, query.game):this.games;
+  var games = applyGameQuery(this.games, query.game);
   var l = games.length;
   if(!l) return next(new Error("404"));
   var item = {user:user,query:query,games:games};
@@ -114,39 +114,35 @@ MatchMaker.prototype.deadGame = function(matchid, name){
   //Happens when all players leave
 };
 
-function applyPlayerQuery = function(players, player_query) {
-  return _.filter(players, player_query);
+function applyPlayerQuery (players, player_query) {
+  return player_query?_.filter(players, player_query):players;
 }
 
+function applyGameQuery (games, game_query) {
+  return game_query?_.filter(this.games, game_query):games;
+}
+
+
 MatchMaker.prototype.createMatch = function(){
-  var l = this.waiting_players.length;
-  var ll = void(0);
-  var lll = void(0);
-  var i =void(0);
-  var ii = void(0);
-  var iii = void(0);
-  var player = void(0);
-  var game = void(0);
-  var players = void(0);
-  for(i=0;i<l;i++){
+  var l, ll, lll;
+  var i, ii, iii;
+  var player;
+  var game;
+  var players;
+  for(i=0, l=this.waiting_players.length;i<l;i++){
     player = this.waiting_players[i];
-    ll = player.games.length;
-    for(ii=0;ii<ll;ii++){
+    for(ii=0, ll = player.games.length;ii<ll;ii++){
       game = player.games[ii];
       players = game.waiting;
-      if(players.length < game.minplayers) continue;
-
       // TODO: update this to apply all players' player queries
       // this should prefer the players first in the queue, but
       // should start a new game if at all possible
-      if(player.query.player){
-        players = applyPlayerQuery(players, player.query.player);
-        if(players.length < game.minplayers) continue;
-      }
+      players = applyPlayerQuery(players, player.query.player);
+      if(players.length < game.minplayers) continue;
 
       while(players.length > game.maxplayers) players.pop();
-      lll = players.length;
-      for(iii=0;iii<lll;iii++){
+      for(iii=0, lll = players.length;iii<lll;iii++){
+        players[iii].trigger("newmatch", match);
         this.removeUser(players[iii]);
       }
       process.nextTick(this.createMatch.bind(this));

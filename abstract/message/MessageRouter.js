@@ -1,12 +1,4 @@
-var doAsync;
-if(typeof module != "undefined" && module.exports){
-  var EventEmitter = require("events").EventEmitter;
-  doAsync = process.nextTick.bind(process);
-}else{
-  doAsync = function(fn){
-    setTimeout(fn,1);
-  };
-}
+var EventEmitter = require("events").EventEmitter;
 
 /**
   An io listener that sends messages to the functions wanting to handle them.
@@ -112,9 +104,7 @@ MessageRouter.prototype.routeMessage = function(message,user,retFn){
         message.error = "Bad message type "+message.type;
         return retFn(message,user);
     }
-  doAsync(function(){
-    that.emit(message.name,message);
-  });
+  setImmediate(this.emit.bind(this,message.name,message));
 };
 
 /**
@@ -140,6 +130,4 @@ MessageRouter.prototype.processMessage = function(message,fn){
     next(void(0),result);
 };
 
-if(typeof module != "undefined"){
-  module.exports = MessageRouter;
-}
+module.exports = MessageRouter;

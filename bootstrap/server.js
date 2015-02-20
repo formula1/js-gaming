@@ -58,7 +58,9 @@ database.collect(function(e,mongo){
       .use("/api",database.router)
       .use("/auth",userserver.router)
 //      .use("/match",matchmaker.router)
-      .use('/temp', require(__root+"/abstract/temporaryRouter"));
+      .use('/temp', function(req,res,next){
+        res.render("generic");
+      });
       test.routes(httpserver);
 
       httpserver.listen(config.http.port);

@@ -1,6 +1,5 @@
 
 var async = require("async");
-var passport = require("passport");
 var mime = require("mime");
 var fs = require("fs");
 var browserify = require("browserify");
@@ -18,11 +17,11 @@ function compileProvider(path,next){
       ret.path = path;
       next(void(0), ret);
     },
-    passportUse,
-    compileAsModule //here it will branch
+    requireProvider,
+    compilePackage //here it will branch
   ],next);
 }
-function passportUse(ret,next){
+function requireProvider(ret,next){
   try{
     ret.provider = require(ret.path);
     next(void(0),ret);
@@ -31,7 +30,7 @@ function passportUse(ret,next){
   }
 }
 
-function compileAsModule(ret,next){
+function compilePackage(ret,next){
   ret.client = {};
   if(ret.isFile) return next(void(0),ret);
   fs.readdir(ret.path,function(err,files){
@@ -46,8 +45,11 @@ function compileAsModule(ret,next){
       }catch(e){
         return next(e);
       }
-      if(!pkg.providerClient) return files2JSON(ret,files,next);
-      ret.client = pkg.providerClient;
+      if(pkg.browser) ret.browser = pkg.browser;
+      if(pkg.providerClient) ret.client = pkg.providerClient;
+      if(!pkg.providerClient || !pkg.browser){
+        return files2JSON(ret,files,next);
+      }
       validateClient(ret,next);
     });
   });
@@ -56,19 +58,19 @@ function compileAsModule(ret,next){
 function files2JSON(ret,files,next){
   var l = files.length;
   while(l--){
-    if(/^icon\./.test(files[l])){
+    if(!ret.client.icon && /^icon\./.test(files[l])){
       ret.client.icon = ret.path+"/"+files[l];
-      if(ret.client.api && ret.client.form) break;
+      if(ret.browser && ret.client.form) break;
       continue;
     }
-    if(/^client(\.js)?$/.test(files[l])){
-      ret.client.api = ret.path+"/"+files[l];
+    if(!ret.browser && /^browser(\.js)?$/.test(files[l])){
+      ret.browser = ret.path+"/"+files[l];
       if(ret.client.icon && ret.client.form) break;
       continue;
     }
-    if(/^form.html$/.test(files[l])){
+    if(!ret.client.form && /^form.html$/.test(files[l])){
       ret.client.form = ret.path+"/"+files[l];
-      if(ret.client.icon && ret.client.api) break;
+      if(ret.client.icon && ret.browser) break;
     }
   }
   validateClient(ret,next);
@@ -80,7 +82,7 @@ function validateClient(ret,next){
     next(void(0),ret);
   });
   if(ret.client.icon) torun.push(validateIcon);
-  if(ret.client.api) torun.push(validateAPI);
+  if(ret.browser) torun.push(validateBrowser);
   if(ret.client.form) torun.push(validateForm);
   async.waterfall(torun,next);
 }
@@ -95,14 +97,10 @@ function validateIcon(ret,next){
   });
 }
 
-function validateAPI(ret,next){
-  try{
-    require.resolve(ret.client.api);
-  }catch(err){
-    return next(err);
-  }
+function validateBrowser(ret,next){
+  //not saving the buffer because multiple modules may require the same buffer
   var b = browserify();
-  b.require(ret.client.api);
+  b.require(ret.browser);
   b.bundle(function(err,buff){
     if(err) return next(err);
     if(buff.length > MAX_CLIENT_API_SIZE){
@@ -110,7 +108,6 @@ function validateAPI(ret,next){
     }
     next(void(0),ret);
   });
-  //todo make sure the requirable module can execute
 }
 
 function validateForm(ret,next){

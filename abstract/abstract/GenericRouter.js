@@ -1,11 +1,11 @@
 var pathToRegexp = require('path-to-regexp');
 
-function SocketRouter(){
+function GenericRouter(){
   if(this instanceof SocketRouter) return this.trigger.apply(this,arguments);
   this.listeners = [];
 }
 
-SocketRouter.prototype.on = function(keymethod){
+GenericRouter.prototype.on = function(keymethod){
   if(!keymethod)
     throw new Error("need either a Object{key:function}, a key and function");
   var that = this;
@@ -27,7 +27,7 @@ SocketRouter.prototype.on = function(keymethod){
   return this;
 };
 
-SocketRouter.prototype.off = function(key){
+GenericRouter.prototype.off = function(key){
   var l;
   var found = false;
   if(typeof key === "undefined"){
@@ -56,21 +56,23 @@ SocketRouter.prototype.off = function(key){
   return this;
 };
 
-SocketRouter.prototype.trigger = function(path, request, socket, fn){
+GenericRouter.prototype.trigger = function(path){
   var that = this;
   var l = this.listeners.length;
   var hasError = false;
-  fn = fn?fn:function(err){ if(err) throw err; };
+  var args = Array.prototype.slice.call(arguments,1);
+  var origlen = args.length;
   var next = function(err,newpath){
     if(err){
-      hasError = err;
+      args.push(err);
       path = "error";
     }else if(newpath){
       path = newpath;
+      args.splice(origlen,args.length-origlen);
     }
     l--;
     if(l < 0){
-      if(path == "error") setImmediate(fn.bind(fn,err));
+      if(path == "error") throw err;
       return;
     }
     if(hasError){
@@ -78,31 +80,26 @@ SocketRouter.prototype.trigger = function(path, request, socket, fn){
     }
     setImmediate(
       SocketRouter.runFunction.bind(
-        that.listeners[l],
-        path,request,socket,err,next
+        that.listeners[l],args,next
       )
     );
   };
   next();
 };
 
-SocketRouter.runFunction = function(path, request, socket, err, next){
+GenericRouter.runFunction = function(path, args, next){
   var matches = this.regex.exec(path);
   if(matches === null) return next();
   matches.shift();
   var l = this.params.length;
-  request.params = {};
+  var params = {};
   while(l--){
     if(typeof matches[l] == "undefined" && !this.params[l].optional) return next();
-    request.params[this.params[l].name] = matches[l];
+    params[this.params[l].name] = matches[l];
   }
   var result;
   try{
-    if(err){
-      result = this.fn(request,socket,err,next);
-    }else{
-      result = this.fn(request,socket,next);
-    }
+    result = this.fn.apply(this.fn,[params].concat(args).push(next));
   }catch(e){
     return next(e);
   }
@@ -112,4 +109,4 @@ SocketRouter.runFunction = function(path, request, socket, err, next){
   }
 };
 
-module.exports = SocketRouter;
+module.exports = MessageRouter;
