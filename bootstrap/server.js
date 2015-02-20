@@ -2,11 +2,14 @@ var config = require("getconfig");
 require("./polyfill");
 
 var database = require("./database")(config);
-var appserver = require("./apps")();
-var userserver = require("./user");
-var matchmaker = require("./matchmaker");
 var httpserver = require("./httpserver");
 var wsserver = require("./wsserver");
+
+var appserver = require("./apps")();
+var chatroom = require("./chatroom");
+var userserver = require("./user");
+//var matchmaker = require("./matchmaker");
+
 
 database.collect(function(e,mongo){
   if(e) throw e;
@@ -27,7 +30,7 @@ database.collect(function(e,mongo){
       if(e) throw e;
       console.log("AppServer finished");
 
-      matchmaker = matchmaker();
+//      matchmaker = matchmaker();
       var test = require("./httpserver/test");
 
       // -----------------
@@ -54,7 +57,7 @@ database.collect(function(e,mongo){
       .use("/apps",appserver.router)
       .use("/api",database.router)
       .use("/auth",userserver.router)
-      .use("/match",matchmaker.router)
+//      .use("/match",matchmaker.router)
       .use('/temp', require(__root+"/abstract/temporaryRouter"));
       test.routes(httpserver);
 

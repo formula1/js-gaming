@@ -19,12 +19,12 @@ if(user){
   while(l--){
     var provider = authTypes[l];
     %><li><%
-    if(provider.html){
-      %><%-provider.html%></li><%
+    if(provider.client.form){
+      %><%-provider.client.form%></li><%
       continue;
     }
     %><a class="login <%=provider.name%>" href="/auth/<%=provider.name%>/login" ><%
-    if(provider.icon){
+    if(provider.client.icon){
       %><img src='/auth/<%=provider.name%>/icon' title='Login with <%=provider.name%>' /><%
     }else{
       %><%=provider.name%><%

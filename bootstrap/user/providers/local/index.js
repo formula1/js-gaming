@@ -1,7 +1,6 @@
-
 var LocalStrategy = require("passport-local");
 var mongoose = require("mongoose");
-var Provider = mongoose.model("_UserProvider");
+var Provider = require(__dirname+"/../../models/provider");
 
 module.exports = new LocalStrategy({
     usernameField: 'username',

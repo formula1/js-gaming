@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-var Provider = mongoose.model("_UserProvider");
+var Provider = require(__dirname+"/../models/provider.js");
 var config = require('getconfig');
 var TwitterStrategy = require('passport-twitter').Strategy;
 

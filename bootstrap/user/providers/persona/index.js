@@ -1,7 +1,7 @@
 var PersonaStrategy = require("passport-persona");
 var config = require("getconfig");
 var mongoose = require("mongoose");
-var Provider = mongoose.model("_UserProvider");
+var Provider = require(__dirname+"/../../models/provider");
 
 console.log(JSON.stringify(PersonaStrategy));
 
