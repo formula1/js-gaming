@@ -138,6 +138,8 @@ MatchMaker.prototype.createMatch = function(){
       for(iii=0;iii<ll;iii++){
         this.removeUser(players[iii]);
       }
+      this.isChecking = false;
+
       return game.sendNewMatch(players);
     }
   }
