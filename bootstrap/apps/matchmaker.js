@@ -141,6 +141,7 @@ MatchMaker.prototype.createMatch = function(){
       return game.sendNewMatch(players);
     }
   }
+  this.isChecking = false;
 };
 
 module.exports = MatchMaker;
