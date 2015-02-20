@@ -12,8 +12,11 @@ if(user){
   <a class="logout" href="/auth/logout">Logout</a>
 <%
 }else{
-  console.log("no user");
-%><h5>Login</h5>
+%>
+  <script type="text/javascript">
+    console.log("no user, so not creating a WebSocket.");
+  </script>
+  <h5>Login</h5>
   <ul><%
   var l = authTypes.length;
   while(l--){
