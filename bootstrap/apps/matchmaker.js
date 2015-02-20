@@ -26,9 +26,11 @@ function MatchMaker(games){
   this.needing_players = [];
   this.isChecking = false;
   var l = games.length;
+  var game;
   while(l--){
-    gameIndex[games[l].name] = {
-      min_players:games[l].minplayers,
+    game = games[l];
+    this.gameIndex[game.name] = {
+      min_players:game.minplayers,
       waiting:[]
     };
   }
@@ -67,6 +69,8 @@ MatchMaker.prototype.checkActiveMatches = function(userItem,next){
 };
 
 MatchMaker.prototype.addToWaitingList = function(userItem,next){
+  var games = userItem.games;
+  var l = games.length;
   this.waiting_players.push(userItem);
   while(l--){
     this.gameIndex[games[l]].waiting.push(userItem);
@@ -84,17 +88,17 @@ MatchMaker.prototype.checkForMatch = function(){
 MatchMaker.prototype.needPlayer = function(matchInfo, game){
   game = _.findOne(this.games, {name:game});
   var l = this.waiting_players.length;
-  if(l){
-    for(var i=0;i<l;i++){
-      if(_.matches(this.waiting_players[l].query.game)(game)){
-        var user = this.waiting_players[l];
-        this.removePlayer(this.waiting_players[l]);
-        return game.sendPlayerToMatch(user,match);
-      }
+  var match_found = this.waiting_players.some(function(player) {
+    if(_.matches(player.query.game)(game)){
+      this.removePlayer(player);
+      game.sendPlayerToMatch(player,matchInfo);
+      return true; //break
     }
-  }
+  });
+  if (match_found) return;
+
   var index = _.indexOf(_.pluck(this.needing_players,"id"),id);
-  if(index == -1){
+  if(index === -1){
     this.needing_players.push({
       id:matchInfo.id,
       matchInfo:matchInfo,
@@ -110,32 +114,39 @@ MatchMaker.prototype.deadGame = function(matchid, name){
   //Happens when all players leave
 };
 
+function applyPlayerQuery = function(players, player_query) {
+  return _.filter(players, player_query);
+}
+
 MatchMaker.prototype.createMatch = function(){
-  var l = this.waitingPlayers.length;
-  var ll = 0;
+  var l = this.waiting_players.length;
+  var ll = void(0);
   var lll = void(0);
-  var i =0;
+  var i =void(0);
   var ii = void(0);
   var iii = void(0);
   var player = void(0);
   var game = void(0);
   var players = void(0);
-  for(i;i<l;i++){
-    player = this.waitingPlayers[i];
+  for(i=0;i<l;i++){
+    player = this.waiting_players[i];
     ll = player.games.length;
     for(ii=0;ii<ll;ii++){
       game = player.games[ii];
-      if(gameIndex[game.name].waiting.length < game.minplayers) continue;
-      if(player.query.player){
-        players = _.filter(gameIndex[game.name].waiting, player.query.player);
-      }else{
-        players = gameIndex[game.name].waiting;
-      }
-      if(players.length === 0) continue;
+      players = game.waiting;
       if(players.length < game.minplayers) continue;
+
+      // TODO: update this to apply all players' player queries
+      // this should prefer the players first in the queue, but
+      // should start a new game if at all possible
+      if(player.query.player){
+        players = applyPlayerQuery(players, player.query.player);
+        if(players.length < game.minplayers) continue;
+      }
+
       while(players.length > game.maxplayers) players.pop();
       lll = players.length;
-      for(iii=0;iii<ll;iii++){
+      for(iii=0;iii<lll;iii++){
         this.removeUser(players[iii]);
       }
       process.nextTick(this.createMatch.bind(this));
