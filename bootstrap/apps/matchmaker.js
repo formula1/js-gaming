@@ -3,7 +3,19 @@ var _ = require("lodash");
 
 /*
 
-Query for compatible games
+Player Enters
+-Query for compatible games
+-Add the player to a list for those games
+-Do next tick - Find a match with current players
+
+Find a match with current players
+-For each player
+--for each of those players compatible game's waiting list
+---check if that players player query matches the games waiting list (Remove blocked players/leavers/winloss/etc)
+----If the remaining players is enough to start a game
+-----Remove players until we hit maximum
+-----Remove the players here from all waiting lists
+-----Send a match Start request to the game.
 
 */
 
