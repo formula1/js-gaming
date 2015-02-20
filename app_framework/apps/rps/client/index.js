@@ -1,7 +1,7 @@
 
 var $ = require("jquery");
 var Timer = require("./Timer");
-var Client2AppCom = require("./Client2AppCom");
+var Client2ServerCom = require("./Client2ServerCom");
 // var Frame2ManagerCom = require("./Frame2ManagerCom");
 
 var status = 0;
@@ -20,7 +20,7 @@ var timer = new Timer(30*1000);
 timer.on("tick",tickCount);
 timer.on("timeout",timeOut);
 
-var GameConsole = new Client2AppCom();
+var GameConsole = new Client2ServerCom();
 
 GameConsole
 .on("countdown",countdown)

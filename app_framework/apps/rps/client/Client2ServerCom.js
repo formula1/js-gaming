@@ -21,6 +21,6 @@ function Client2ServerCom(uri){
   });
 }
 
-util.inherits(Client2AppCom,EventEmitter);
+util.inherits(Client2ServerCom,EventEmitter);
 
-module.exprots = Client2AppCom;
+module.exprots = Client2ServerCom;
