@@ -18,6 +18,11 @@ module.exports = function(ob){
     res.locals.theApp = req.theApp;
     res.render("game/index");
   });
+  router.get("/:appname/join", function(req,res,next){
+    console.log("joining list");
+    res.locals.theApp = req.theApp;
+    res.render("game/index");
+  });
   router.get("/:appname/public", function(req,res,next){
     console.log("public");
     res.sendFile(req.theApp.path+"/public/index.html");

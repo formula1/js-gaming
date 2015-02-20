@@ -1,6 +1,25 @@
+var path = require("path");
+global.__root = path.resolve(__dirname+"/../..");
+
 var Match = require("./Match");
 var MatchMaker = require("./MatchMaker");
 var Player = require("./Player");
+var MessageDuplex = require(__root+"/abstract/abstract/MessageDuplex");
+
+var parentCom = new MessageDuplex(function(message){
+  process.send({type:"forkdup", msg:message});
+});
+process.on("message",function (message,handle){
+  if(message.type && message.type === "forkdup"){
+    parentCom.handleMessage(message.msg);
+  }
+});
+
+parentCom.add("an_event", function(data){
+  console.log("I got an event!!!!!!!");
+});
+
+parentCom.ready();
 
 if(!module.parent){
   global.Match = Match;
@@ -9,7 +28,9 @@ if(!module.parent){
 
   var websocket = require('websocket-driver');
   var app = require(process.argv[2].toString("utf8"));
+
   process.on("message",function (message,handle){
+    if(message.type && message.type !== "something else") return;
     var driver = websocket.http(message.request);
     driver.io.write(message.body);
     handle.pipe(driver.io).pipe(handle);

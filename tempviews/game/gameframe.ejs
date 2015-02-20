@@ -9,12 +9,7 @@
   </head>
   <body>
     <%-include("../header.ejs") %>
-    <div>
-      <article class="markdown">
-        <%-theApp.readme%>
-      </article>
-      <a class="play" href="<%-routePaths.apps%>/join" >Play Now</a>
-    </div>
+    <iframe src="/apps/<%-theApp.name%>/public" ></iframe>
     <%-include("../footer.ejs") %>
   </body>
 </html>

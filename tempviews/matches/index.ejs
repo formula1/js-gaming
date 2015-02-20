@@ -15,6 +15,15 @@
       </li><%
       }
     %></ul>
+    <form action="<%-routePaths.match%>/request" method="POST">
+      <label for="gameType"> GameType:
+        <select name="gameType"><%
+          for(var i=0, l=appsList.length;i<l;i++){
+            %><option value="<%=appsList[i].name" ><%=appsList[i].name%></option><%
+          }
+        %></select>
+      </label>
+    </form>
     <%-include("../footer.ejs") %>
   </body>
 </html>

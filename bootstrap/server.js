@@ -42,6 +42,7 @@ database.collect(function(e,mongo){
           match:"/match",
           index:"/temp",
         };
+        next();
       })
       .use(userserver.middleware)
       .use(appserver.renderware)

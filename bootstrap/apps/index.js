@@ -2,8 +2,11 @@ var child_process = require("child_process");
 var fs = require("fs");
 var async = require("async");
 var browserify = require("browserify");
+var markdown = require("markdown").markdown;
 var express = require("express");
 var cbpr = require(__root+"/abstract/utility/cbpromise");
+
+var MessageDuplex = require(__root+"/abstract/abstract/MessageDuplex");
 
 
 function AppCompiler(directory){
@@ -36,14 +39,6 @@ AppCompiler.prototype.collect = function(next){
   return cbret.ret;
 };
 
-/*
-res.setHeader('content-type', 'application/javascript');
-b.on('error', next);
-b.pipe(res);
-*/
-
-
-
 function startApp(directory,appfile,next){
   async.waterfall([
     function(next){
@@ -55,6 +50,7 @@ function startApp(directory,appfile,next){
     compileFork,
     compileBrowser,
     compileStatic,
+    compileReadme,
   ],next);
 }
 
@@ -85,6 +81,16 @@ function compileFork(ret,next){
       ret.fork.kill();
       return next(new Error("fork process sending messages before initialization"));
     }
+    ret.dup = new MessageDuplex(function(message){
+      ret.fork.send({type:"forkdup", msg:message});
+    });
+    ret.fork.on("message", function(message,handle){
+      if(message.type && message.type === "forkdup"){
+        ret.dup.handleMessage(message.msg);
+      }
+    });
+    ret.dup.ready();
+    ret.dup.trigger("an_event");
     next(void(0),ret);
   });
   ret.fork.once("error",function(e){
@@ -95,15 +101,24 @@ function compileFork(ret,next){
 }
 
 function compileBrowser(ret,next){
-    browserify(ret.path+"/client").bundle(function(e,buff){
-      ret.client = buff;
-      next(e,ret);
-    });
+  browserify(ret.path+"/client").bundle(function(e,buff){
+    ret.client = buff;
+    next(e,ret);
+  });
 }
 
 function compileStatic(ret,next){
   ret.public = express.static(ret.path+"/public");
   next(void(0),ret);
+}
+
+function compileReadme(ret,next){
+  fs.readFile(ret.path+"/README.md", function(err,file){
+    if(err) return next(err);
+    ret.readme = markdown.toHTML(file.toString("utf8"));
+    next(void(0),ret);
+  });
+
 }
 
 module.exports = AppCompiler;

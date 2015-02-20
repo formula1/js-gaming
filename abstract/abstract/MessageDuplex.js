@@ -1,5 +1,5 @@
-var MessageRouter = require(___dirname+"/MessageRouter.js");
-var MessageWriter = require(___dirname+"/MessageWriter.js");
+var MessageRouter = require(__dirname+"/MessageRouter.js");
+var MessageWriter = require(__dirname+"/MessageWriter.js");
 var doAsync = process.nextTick.bind(process);
 
 function MessageDuplex(wSendFn, rSendFn){
@@ -40,3 +40,5 @@ MessageDuplex.prototype.handleMessage = function(message,user){
   }
 };
 MessageDuplex.prototype.constructor = MessageDuplex;
+
+module.exports = MessageDuplex;

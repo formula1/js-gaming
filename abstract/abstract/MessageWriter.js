@@ -53,13 +53,13 @@ MessageWriter.prototype.returnMessage = function (message) {
 
 
 MessageWriter.prototype.trigger = function(name,data){
-  this.messageFactory("trigger",name).send(data);
+  this._send(this.templateFactory("trigger",name), data);
 };
 
 MessageWriter.prototype.get = function (name, data, cb) {
 	var cr = callprom(cb,this);
   // save callback so we can call it when receiving the reply
-	this.messageFactory("get", name, cr.cb).send(data);
+	this._send(this.templateFactory("get", name, cr.cb), data);
 	return cr.ret;
 };
 
@@ -74,7 +74,7 @@ MessageWriter.prototype.listen = function(name, data, callback){
     ret = new StreamPromise();
     callback = ret._write.bind(ret);
   }
-  var p = this.messageFactory("pipe", name, callback);
+  var p = this.templateFactory("pipe", name, callback);
   while(args.length > 0)
     p.send(args.shift());
   if(ret){
@@ -93,7 +93,7 @@ MessageWriter.prototype.duplex = function(name){
 };
 
 MessageWriter.prototype._send = function(template,data){
-	var clone = JSON.parse(JSON.stringify(content));
+	var clone = JSON.parse(JSON.stringify(template));
 	clone.data = data;
 	if(this._ready){
 		this.wSendFn(clone);
