@@ -6,7 +6,7 @@ var markdown = require("markdown").markdown;
 var express = require("express");
 var browserify = require("browserify");
 var child_process = require("child_process");
-var MessageDuplex = require(__root+"/abstract/abstract/MessageDuplex");
+var MessageDuplex = require(__root+"/abstract/message/MessageDuplex");
 
 
 

@@ -11,5 +11,9 @@
   "dependencies": {
     "jQuery": "^1.7.4",
     "jquery": "^2.1.3"
+  },
+  "gameConfig":{
+    "minimum_players":2,
+    "maximum_players":2
   }
 }

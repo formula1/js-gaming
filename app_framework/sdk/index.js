@@ -4,7 +4,7 @@ global.__root = path.resolve(__dirname+"/../..");
 var Match = require("./Match");
 var MatchMaker = require("./MatchMaker");
 var Player = require("./Player");
-var MessageDuplex = require(__root+"/abstract/abstract/MessageDuplex");
+var MessageDuplex = require(__root+"/abstract/message/MessageDuplex");
 
 var parentCom = new MessageDuplex(function(message){
   process.send({type:"forkdup", msg:message});

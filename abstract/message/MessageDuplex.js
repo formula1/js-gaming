@@ -22,8 +22,12 @@ function MessageDuplex(wSendFn, rSendFn){
   MessageRouter.call(this, rSendFn);
   MessageWriter.call(this, wSendFn);
 }
-util.inherits(MessageDuplex, MessageWriter);
-util.inherits(MessageDuplex, MessageRouter);
+MessageDuplex.prototype = Object.create(MessageWriter.prototype);
+MessageDuplex.prototype.rSendFn = MessageRouter.prototype.rSend;
+MessageDuplex.prototype.add = MessageRouter.prototype.add;
+MessageDuplex.prototype.routeMessage = MessageRouter.prototype.routeMessage;
+MessageDuplex.prototype.processMessage = MessageRouter.prototype.processMessage;
+MessageDuplex.prototype.constructor = MessageDuplex;
 
 MessageDuplex.prototype.handleMessage = function(message,user){
   console.log(message.originator);
