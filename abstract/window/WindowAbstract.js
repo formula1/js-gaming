@@ -1,4 +1,4 @@
-var MessageDuplex = require(__root+"/core/abstract/MessageDuplex.js");
+var MessageDuplex = require(__root+"/abstract/message/MessageDuplex.js");
 
 function WinAbs(context, origin){
   this.origin = (origin)?origin:"*";
