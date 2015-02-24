@@ -1,4 +1,4 @@
-var MessageDuplex = require(__root+"/core/abstract/MessageDuplex.js");
+var MessageDuplex = require(__root+"/abstract/message/MessageDuplex.js");
 
 function WinAbs(context, origin){
   this.origin = (origin)?origin:"*";
@@ -51,3 +51,5 @@ WinAbs.getTop = function(){
     window.RootManager = new WinAbs(window.top);
   throw new Error("this parent has no parent");
 };
+
+moduele.exports = WinAbs;

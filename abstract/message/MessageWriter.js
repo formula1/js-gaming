@@ -1,6 +1,5 @@
 var callprom = require("../utility/cbpromise");
-var MessageDuplex = require("./MessageDuplex");
-var StreamPromise = require("./StreamPromise.js");
+var StreamPromise = require(__dirname+"/StreamPromise.js");
 var EventEmitter = require("events").EventEmitter;
 var util = require("util");
 
@@ -85,7 +84,8 @@ MessageWriter.prototype.listen = function(name, data, callback){
 };
 
 MessageWriter.prototype.duplex = function(name){
-	return new MessageDuplex(function(){
+	if (! MessageDuplex) MessageDuplex = require("./MessageDuplex");
+  return new MessageDuplex(function(){
 
 	},function(){
 

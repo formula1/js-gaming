@@ -42,7 +42,7 @@ function compileFork(ret,next){
   var timeout = setTimeout(function(){
     ret.fork.removeAllListeners();
     ret.fork.kill();
-    return next(new Error(j.title+"'s fork process timed out, this may be due to long syncrounous code on initialization'"));
+    return next(new Error(ret.name+"'s fork process timed out, this may be due to long syncrounous code on initialization'"));
   }, 5000);
   ret.fork.once("message",function(m){
     clearTimeout(timeout);

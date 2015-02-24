@@ -54,7 +54,16 @@ ModelCompiler.prototype.collect = function(next){
   });
   db.once("open",function(){
     db.removeAllListeners();
+    console.log('ModelCompiler.collect: no models to require');
     cbret.cb(void(0),mongoose);
+    /*fs.readdir(__root+"/models",function(err,files){
+      if(err) return cbret.cb(err);
+      var l = files.length;
+      while(l--){
+        require(__root+"/models/"+files[l]);
+      }
+      cbret.cb(void(0),mongoose);
+    });*/
   });
   return cbret.ret;
 };
