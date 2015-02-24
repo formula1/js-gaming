@@ -12,7 +12,14 @@ module.exports = function(ob){
     req.theApp = ob.compiled[l];
     next();
   });
-
+  router.use(function(req,res,next){
+    if(!req.user) return res.redirect("/auth/login");
+    next();
+  });
+  router.get(/\/?/, function(req,res,next){
+    res.locals.playerMatches = [];
+    res.render("game/index");
+  });
   router.get("/:appname", function(req,res,next){
     console.log("appname");
     res.locals.theApp = req.theApp;

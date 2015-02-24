@@ -3,10 +3,6 @@ if(user){
 %>
   <script type="text/javascript">
     window.User = <%-JSON.stringify(user)%>;
-    window.onload = function(){
-      var url = new URL(document.URL);
-      var socket = new WebSocket("ws://"+url.hostname+":"+4180+"/poop");
-    }
   </script>
   <h3>Hello <%=user.username%></h3>
   <a class="logout" href="/auth/logout">Logout</a>

@@ -1,22 +1,28 @@
 
 var http = require('http'),
 websocket = require('websocket-driver');
-var server = http.createServer();
 var url = require("url");
-var express = require("express");
-var router = express.Router();
-server.on('upgrade', function(request, socket, body) {
-  if (!websocket.isWebSocket(request)) return;
-  //console.log(request);
-  router(request,{},function(err){
-    if(err) return socket.end();
-    var uri = url.parse(request.url);
-    var path = uri.path.split("/");
-    path.shift();
-    console.log(request.user);
-    socket.end();
-  });
-});
+var wsrouter = new require(__root+"/abstract/abstract/SocketRouter")();
 
-module.exports = server;
-module.exports.router = router;
+wsrouter.init = function(req,soc,body){
+  if (!websocket.isWebSocket(req)) return;
+  console.log("socket");
+  req.body = body;
+  //console.log(request);
+  this.trigger(req,soc,function(err){
+    if(err){
+      console.error(err.stack);
+    }else{
+      console.error("404: "+req.url);
+    }
+    soc.end();
+  });
+}.bind(wsrouter);
+
+wsrouter.listen = function(port){
+  var server = http.createServer();
+  server.on("upgrade",this.init);
+  server.listen(port);
+};
+
+module.exports = wsrouter;

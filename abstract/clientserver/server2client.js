@@ -6,12 +6,15 @@ function Client(info, socket){
   var _this = this;
   this.info = info;
   this.info.handShake = !!info.handShake;
+  if(!this.info.handShake) info.readyState = -1;
+  console.log("client");
   this.socket = socket;
   this.driver = websocket.http(info.request, info.options);
   MessageDuplex.call(this,function(message){
     _this.driver.send(JSON.stringify(message));
   });
   this.driver.on('open', function(event){
+    console.log("opened");
     _this.info.handShake = true;
     _this.start();
   });
@@ -26,6 +29,7 @@ function Client(info, socket){
   this.driver.on('error', this.emit.bind(this,"error"));
   this.driver.on("close", this.stop.bind(this));
   socket.pipe(this.driver.io).pipe(socket);
+  console.log(info.readyState);
   if(info.readyState === -1){
     if(info.body) this.driver.io.write(info.body);
     this.driver.start();
@@ -34,9 +38,8 @@ function Client(info, socket){
     _this.start();
   }
 }
-
-util.inherits(Client,MessageDuplex);
-
+Client.prototype = Object.create(MessageDuplex.prototype);
+Client.prototype.constructor = Client;
 
 Client.prototype.export = function(){
   this.stop();

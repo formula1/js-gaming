@@ -5,12 +5,51 @@
   </head>
   <body>
     <%-include("../header.ejs") %>
-    <div>
-      <article class="markdown">
-        <%-theApp.readme%>
-      </article>
-      <a class="play" href="<%-routePaths.apps%>/<%-theApp.name%>/join" >Play Now</a>
-    </div>
+    <section id="match_container">
+      <div>
+        <%-include("match/form")%>
+      </div>
+      <%
+        if(typeof playerMatches != "undefined"){
+          var l = playerMatches.length;
+          while(l--){
+            %><div>
+              <iframe src="<%-routePaths.apps+
+                '/'+playerMatches[l].gamename+
+                '/'+playerMatches[l].id%>"></iframe>
+            </div><%
+          }
+        }
+      %>
+    </section>
+    <script type="text/javascript">
+      var Server = require("Server");
+      var url = require("url");
+      jQuery(function($){
+        var $matches = $("#match_container");
+        var $form = $matches.find("form");
+        var MatchMaker = new Server("<%-routePaths.apps%>");
+        $form.on("submit",function(e){
+          e.preventDefault();
+          if(!MatchMaker.ready) return;
+          $form.serialize();
+          MatchMaker.get("find", function(e,value){
+            var frame = $("<div><iframe "+
+              "src=\"<%-routePaths.apps%>/"+value.gamename+"/"+value.id+"\""+
+              " ></iframe></div>"
+            );
+            $matches.append(frame);
+          });
+        });
+        console.log(JSON.stringify(url));
+        /*
+        var uri = url.parse(document.location);
+        if(!url.search) return;
+        $form.unserialize(url.search);
+        $form.submit();
+        */
+      });
+    </script>
     <%-include("../footer.ejs") %>
   </body>
 </html>

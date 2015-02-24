@@ -2,13 +2,18 @@ var MessageDuplex = require("../message/MessageDuplex.js");
 var url = require("url");
 var util = require("util");
 
-function Server(url,socket){
+
+function Server(uri,socket){
   var that = this;
-  if(typeof url === "object"){
-    url = url.format(url); //for error checking
+  var docuri = url.parse(window.location.href);
+  if(typeof uri === "object"){
+    uri = uri.format(uri); //for error checking
   }
-  if(typeof url === "string"){
-    this.url = url.parse(url);
+  if(typeof uri === "string"){
+    this.url = url.parse(uri);
+    if(!this.url.host) this.url.host = docuri.host;
+    if(!this.url.port) this.url.port = 3001;
+    if(!this.url.pass) this.url.pass = docuri.pass;
     this.url.protocol = "ws:";
   }else{
     throw new Error("Url can only be a string or object");

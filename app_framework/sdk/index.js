@@ -5,6 +5,7 @@ var Match = require("./Match");
 var MatchMaker = require("./MatchMaker");
 var Player = require("./Player");
 var MessageDuplex = require(__root+"/abstract/message/MessageDuplex");
+var Client = require(__root+"/abstract/clientserver/server2client");
 
 var parentCom = new MessageDuplex(function(message){
   process.send({type:"forkdup", msg:message});
@@ -30,18 +31,12 @@ if(!module.parent){
   var app = require(process.argv[2].toString("utf8"));
 
   process.on("message",function (message,handle){
-    if(message.type && message.type !== "something else") return;
-    var driver = websocket.http(message.request);
-    driver.io.write(message.body);
-    handle.pipe(driver.io).pipe(handle);
+    if(message.type && message.type !== "socket") return;
+    var User = new Client(message,handle);
+    User.user = message.user;
     switch(message.cmd){
-      case "enter": return app.playerEnter(message.user,driver).then(function(){
-        driver.start();
-      });
-      case "match": return app.playerEnter(message.user,driver)
-      .call("requestEntry",match).then(function(){
-        driver.start();
-      });
+      case "enter": return app.playerEnter(User);
+      case "match": return app.find().requestEntry(User);
     }
   });
   process.send("ready");

@@ -1,9 +1,39 @@
-var pathToRegexp = require('path-to-regexp');
+var pathToRegExp = require('path-to-regexp');
+var url = require("url");
 
 function SocketRouter(){
-  if(this instanceof SocketRouter) return this.trigger.apply(this,arguments);
+  if(!(this instanceof SocketRouter)){
+    return new SocketRouter();
+  }
   this.listeners = [];
+  this.trigger = this.trigger.bind(this);
 }
+
+SocketRouter.prototype.trigger = function(request, socket, fn){
+  var path = url.parse(request.url).pathname;
+  var that = this;
+  var l = this.listeners.length;
+  fn = fn?fn:function(err){ if(err) throw err; };
+  var next = function(err,newpath){
+    if(newpath){
+      path = newpath;
+    }
+    l--;
+    if(l < 0){
+      if(err) setImmediate(fn.bind(fn,err));
+      return;
+    }
+    setImmediate(
+      SocketRouter.runFunction.bind(
+        that.listeners[l],
+        path,request,socket,err,next
+      )
+    );
+  };
+  next();
+};
+
+SocketRouter.prototype.constructor = SocketRouter;
 
 SocketRouter.prototype.on = function(keymethod){
   if(!keymethod)
@@ -19,6 +49,7 @@ SocketRouter.prototype.on = function(keymethod){
 
   Object.keys(ob).forEach(function(key){
     var item = {};
+    item.method = "ws";
     item.key = key;
     item.regex = pathToRegExp(key,item.params);
     item.fn = ob[key];
@@ -26,6 +57,30 @@ SocketRouter.prototype.on = function(keymethod){
   });
   return this;
 };
+
+SocketRouter.prototype.error = function(keymethod){
+  if(!keymethod)
+    throw new Error("need either a Object{key:function}, a key and function");
+  var that = this;
+  var ob = {};
+  var ret;
+  if(arguments.length == 2){
+    ob[arguments[0]] = arguments[1];
+  }else{
+    ob = keymethod;
+  }
+
+  Object.keys(ob).forEach(function(key){
+    var item = {};
+    item.method = "error";
+    item.key = key;
+    item.regex = pathToRegExp(key,item.params);
+    item.fn = ob[key];
+    that.listeners.push(item);
+  });
+  return this;
+};
+
 
 SocketRouter.prototype.off = function(key){
   var l;
@@ -56,45 +111,19 @@ SocketRouter.prototype.off = function(key){
   return this;
 };
 
-SocketRouter.prototype.trigger = function(path, request, socket, fn){
-  var that = this;
-  var l = this.listeners.length;
-  var hasError = false;
-  fn = fn?fn:function(err){ if(err) throw err; };
-  var next = function(err,newpath){
-    if(err){
-      hasError = err;
-      path = "error";
-    }else if(newpath){
-      path = newpath;
-    }
-    l--;
-    if(l < 0){
-      if(path == "error") setImmediate(fn.bind(fn,err));
-      return;
-    }
-    if(hasError){
-      err = hasError;
-    }
-    setImmediate(
-      SocketRouter.runFunction.bind(
-        that.listeners[l],
-        path,request,socket,err,next
-      )
-    );
-  };
-  next();
-};
-
 SocketRouter.runFunction = function(path, request, socket, err, next){
+  if(err && this.method != "error") return next();
+  if(!err && this.method != "ws") return next();
   var matches = this.regex.exec(path);
   if(matches === null) return next();
   matches.shift();
-  var l = this.params.length;
   request.params = {};
-  while(l--){
-    if(typeof matches[l] == "undefined" && !this.params[l].optional) return next();
-    request.params[this.params[l].name] = matches[l];
+  if(this.params){
+    var l = this.params.length;
+    while(l--){
+      if(typeof matches[l] == "undefined" && !this.params[l].optional) return next();
+      request.params[this.params[l].name] = matches[l];
+    }
   }
   var result;
   try{

@@ -49,7 +49,7 @@ module.exports.router = function(provider){
     res.status(200).setHeader("content-type","application/javascript");
     provider.clientAPI.pipe(res);
   }).get("/login", function(req,res){
-    res.render(provider.renderPath+"/login");
+    res.render(provider.renderPath+"/index");
   }).get('/logout', function(req, res, next){
     req.user.loggedIn = false;
     req.user.save(function(err){

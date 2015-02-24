@@ -42,7 +42,7 @@ MatchMaker.prototype.addUser = function(user,query,next){
   var l = games.length;
   if(!l) return next(new Error("404"));
   var item = {user:user,query:query,games:games};
-  if(!user.joinInProgress || !this.needing_players.length){
+  if(!query.joinInProgress || !this.needing_players.length){
     return this.addToWaitingList(item,next);
   }
   this.checkActiveMatches(item,function(err){
@@ -76,7 +76,7 @@ MatchMaker.prototype.addToWaitingList = function(userItem,next){
     this.gameIndex[games[l]].waiting.push(userItem);
   }
   this.checkForMatch();
-  next();
+  next(void(0), userItem);
 };
 
 MatchMaker.prototype.checkForMatch = function(){
@@ -115,7 +115,7 @@ MatchMaker.prototype.deadGame = function(matchid, name){
 };
 
 function applyPlayerQuery (players, player_query) {
-  return player_query?_.filter(players, player_query):players;
+  return player_query?_.filter(players, {user:player_query}):players;
 }
 
 function applyGameQuery (games, game_query) {

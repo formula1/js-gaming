@@ -1,7 +1,7 @@
 var Server = require(__root+"/window/public/Window2Server_com");
 var NetworkInstance = require(__dirname+"/NetworkUser.js");
 var EventEmitter = require("events").EventEmitter;
-var _ = require("lowdash");
+var _ = require("lodash");
 var url = require("url");
 
 function ClientHost(uri,config,sconfig){

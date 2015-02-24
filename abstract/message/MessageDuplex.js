@@ -1,5 +1,5 @@
-var MessageRouter = require(__dirname+"/MessageRouter.js");
-var MessageWriter = require(__dirname+"/MessageWriter.js");
+var MessageRouter = require("./MessageRouter.js");
+var MessageWriter = require("./MessageWriter.js");
 var util = require("util");
 
 function MessageDuplex(wSendFn, rSendFn){

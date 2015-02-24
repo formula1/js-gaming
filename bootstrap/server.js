@@ -2,6 +2,7 @@ var config = require("getconfig");
 require("./polyfill");
 
 var database = require("./database")(config);
+var http = require("http");
 var httpserver = require("./httpserver");
 var wsserver = require("./wsserver");
 
@@ -37,6 +38,7 @@ database.collect(function(e,mongo){
       // Enable Sessions and cookies
       // -----------------
       httpserver
+      .get("/api.js",require(__root+"/abstract/messageAPI.js"))
       .use(function(req,res,next){
         res.locals.routePaths = {
           apps:"/apps",
@@ -63,12 +65,16 @@ database.collect(function(e,mongo){
       });
       test.routes(httpserver);
 
-      httpserver.listen(config.http.port);
-      console.log('HTTP is running at: http://localhost:' + config.http.port + '.');
+      wsserver
+      .on("*",userserver.middleware)
+      .on("/apps",appserver.wsrouter);
 
-      wsserver.router.use(userserver.middleware);
-      wsserver.listen(config.websocket.port);
-      console.log('WebSocket Server is running at: http://localhost:' + config.websocket.port + '.');
+      var server = new http.Server();
+      server.on("request",httpserver);
+      server.on("upgrade",wsserver.init);
+
+      server.listen(config.http.port);
+      console.log('HTTP and WebSocket is running at: http://localhost:' + config.http.port + '.');
     });
   });
 });

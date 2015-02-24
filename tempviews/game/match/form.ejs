@@ -1,0 +1,12 @@
+<form class="gamesearcher" action="<%-routePaths.apps%>/find" method="POST" >
+  <label for="name" >Name: <select name="name" >
+    <%
+      var l = appsList.length;
+      while(l--){
+        %><option value="<%=appsList[l].name%>"><%=appsList[l].name%></option><%
+      }
+    %>
+  </select></label>
+  <br/>
+  <button type="submit">Find Match</button>
+</form>

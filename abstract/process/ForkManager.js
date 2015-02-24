@@ -1,23 +1,23 @@
 var EventEmitter = require("events").EventEmitter;
-var FrameContext = require("./FrameContext.js");
+var ForkContext = require("./ForkContext.js");
 
-function WindowManager(configs){
+function ForkManager(configs){
   EventEmitter.call(this);
   this.configs = [];
   this.windows = {};
   if(configs)
     setTimeout(this.load.bind(this,configs),1);
 }
-WindowManager.prototype = Object.create(EventEmitter);
-WindowManager.prototype.constructor = WindowManager;
+ForkManager.prototype = Object.create(EventEmitter);
+ForkManager.prototype.constructor = ForkManager;
 
-WindowManager.prototype.load = function(configs){
+ForkManager.prototype.load = function(configs){
   configs.forEach(this.registerWindow.bind(this));
   this.emit("load");
   return this;
 };
 
-WindowManager.prototype.register = function(config,ctx,cb){
+ForkManager.prototype.register = function(config,ctx,cb){
   var win;
   if(!(config instanceof FrameContext)){
     win = new FrameContext(this, config);

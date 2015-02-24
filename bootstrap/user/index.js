@@ -12,7 +12,7 @@ function ProviderCompiler(directory,options){
   if (!(this instanceof ProviderCompiler)){
     return new ProviderCompiler(directory);
   }
-  this.renderPath = options && options.renderPath?options.renderPath:__root+"/views";
+  this.renderPath = options && options.renderPath?options.renderPath:__root+"/tempviews/auth";
   this.directory = directory?directory:__dirname+"/providers";
   this.providers = [];
   this.UserModel = require(__dirname+"/models/user");

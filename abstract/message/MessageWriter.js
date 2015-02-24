@@ -1,6 +1,6 @@
 var callprom = require("../utility/cbpromise");
 var MessageDuplex = require("./MessageDuplex");
-var StreamPromise = require(__dirname+"/StreamPromise.js");
+var StreamPromise = require("./StreamPromise.js");
 var EventEmitter = require("events").EventEmitter;
 var util = require("util");
 
@@ -23,8 +23,8 @@ function MessageWriter(wSendFn){
   // method calls that are sent and waiting an answer
 }
 
-util.inherits(MessageWriter,EventEmitter);
-
+MessageWriter.prototype = Object.create(EventEmitter.prototype);
+MessageWriter.prototype.constructor = MessageWriter;
 
 MessageWriter.prototype.wSendFn = function(message,user){
 	throw new Error("this message is abstract and needs to be overwritten");
@@ -57,7 +57,7 @@ MessageWriter.prototype.trigger = function(name,data){
 };
 
 MessageWriter.prototype.get = function (name, data, cb) {
-	var cr = callprom(cb,this);
+	var cr = callprom(this,cb);
   // save callback so we can call it when receiving the reply
 	this._send(this.templateFactory("get", name, cr.cb), data);
 	return cr.ret;
