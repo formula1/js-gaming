@@ -1,5 +1,5 @@
 var callprom = require("../utility/cbpromise");
-var StreamPromise = require(__dirname+"/StreamPromise.js");
+var StreamPromise = require("./StreamPromise.js");
 var EventEmitter = require("events").EventEmitter;
 var util = require("util");
 
@@ -73,7 +73,7 @@ MessageWriter.prototype.listen = function(name, data, callback){
     ret = new StreamPromise();
     callback = ret._write.bind(ret);
   }
-  var p = this.templateFactory("pipe", name, callback);
+  var p = this.templateFactory("listen", name, callback);
   while(args.length > 0)
     p.send(args.shift());
   if(ret){

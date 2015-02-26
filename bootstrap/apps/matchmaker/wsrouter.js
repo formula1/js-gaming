@@ -5,23 +5,20 @@ var _ = require("lodash");
 
 module.exports = function(app){
   var router = new SocketRouter();
-  router.on("/apps",function(req,socket){
-    console.log("got request");
-    var body = req.body;
-    delete req.body;
-    var user = req.user.toJSON();
-    delete req.user;
-    console.log(JSON.stringify(req));
-    var u = new Client({request:req,body:body,user:user},socket);
-    u
-    .add("find",function(query,next){
-      app.MatchMaker.addUser(u,query,function(err,item){
-        if(err) return next(err);
+  router.on("/apps",function(req,socket,next){
+    console.log("hit apps");
+    if(!req.user) return next(new Error("matchmaking requires login"));
+    console.log("have user");
+    var u = new Client(req,socket);
+    console.log("created client");
+    u.add("find",function(query,res){
+      app.matchmaker.addUser(u.user,query,res,function(err,item){
+        if(err) return res(err);
+        console.log("added user");
         u.add("stop",function(){
-          MatchMaker.removeUser(item,next);
-        })
-        .on("close",function(){
-          MatchMaker.removeUser(item,next);
+          app.matchmaker.removeUser(item,next);
+        }).on("close",function(){
+          app.matchmaker.removeUser(item,next);
         });
       });
     });

@@ -13,27 +13,41 @@ SocketRouter.prototype.trigger = function(request, socket, fn){
   var path = url.parse(request.url).pathname;
   var that = this;
   var l = this.listeners.length;
+  var i = 0;
   fn = fn?fn:function(err){ if(err) throw err; };
   var next = function(err,newpath){
     if(newpath){
       path = newpath;
     }
-    l--;
-    if(l < 0){
-      if(err) setImmediate(fn.bind(fn,err));
-      return;
-    }
+    if(i === l){ return setImmediate(fn.bind(fn,err)); }
     setImmediate(
       SocketRouter.runFunction.bind(
-        that.listeners[l],
+        that.listeners[i],
         path,request,socket,err,next
       )
     );
+    i++;
   };
   next();
 };
 
-SocketRouter.prototype.constructor = SocketRouter;
+
+SocketRouter.prototype.use = function(fns){
+  var that = this;
+  if(!Array.isArray(fns)){
+    fns = [fns];
+  }
+  fns.forEach(function(fn){
+    if(typeof fn != "function") throw new Error("SocketRouter.use needs functions");
+    that.listeners.push({
+      method: "ws",
+      key: "middleware",
+      regex: /.*/,
+      fn: fn,
+    });
+  });
+  return this;
+};
 
 SocketRouter.prototype.on = function(keymethod){
   if(!keymethod)
@@ -112,16 +126,22 @@ SocketRouter.prototype.off = function(key){
 };
 
 SocketRouter.runFunction = function(path, request, socket, err, next){
-  if(err && this.method != "error") return next();
+  if(err && this.method != "error") return next(err);
   if(!err && this.method != "ws") return next();
   var matches = this.regex.exec(path);
-  if(matches === null) return next();
+  if(matches === null){
+    console.error("no matches");
+    return next();
+  }
   matches.shift();
   request.params = {};
   if(this.params){
     var l = this.params.length;
     while(l--){
-      if(typeof matches[l] == "undefined" && !this.params[l].optional) return next();
+      if(typeof matches[l] == "undefined" && !this.params[l].optional){
+        console.error("missing required params");
+        return next();
+      }
       request.params[this.params[l].name] = matches[l];
     }
   }
@@ -133,9 +153,11 @@ SocketRouter.runFunction = function(path, request, socket, err, next){
       result = this.fn(request,socket,next);
     }
   }catch(e){
+    console.error(e);
     return next(e);
   }
   if(typeof result != "undefined"){
+    console.log("have result: "+JSON.stringify(result));
     if(result === null) result = void(0);
     next(void(0),result);
   }

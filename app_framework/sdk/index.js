@@ -18,6 +18,9 @@ process.on("message",function (message,handle){
 
 parentCom.add("an_event", function(data){
   console.log("I got an event!!!!!!!");
+}).add("match", function(data){
+  console.log("new match: "+data.match_id);
+  console.log("expected players: ", data.players);
 });
 
 parentCom.ready();

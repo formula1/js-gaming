@@ -25,6 +25,7 @@
     <script type="text/javascript">
       var Server = require("Server");
       var url = require("url");
+      var querystring = require("qs");
       jQuery(function($){
         var $matches = $("#match_container");
         var $form = $matches.find("form");
@@ -32,8 +33,8 @@
         $form.on("submit",function(e){
           e.preventDefault();
           if(!MatchMaker.ready) return;
-          $form.serialize();
-          MatchMaker.get("find", function(e,value){
+          MatchMaker.get("find", querystring.parse($form.serialize()), function(e,value){
+            if(e) throw e;
             var frame = $("<div><iframe "+
               "src=\"<%-routePaths.apps%>/"+value.gamename+"/"+value.id+"\""+
               " ></iframe></div>"
@@ -41,13 +42,10 @@
             $matches.append(frame);
           });
         });
-        console.log(JSON.stringify(url));
-        /*
-        var uri = url.parse(document.location);
-        if(!url.search) return;
-        $form.unserialize(url.search);
+        var uri = url.parse(document.location.href);
+        if(!uri.search) return;
+        $form.unserialize(uri.search.substring(/^\?/.test(uri)?1:0));
         $form.submit();
-        */
       });
     </script>
     <%-include("../footer.ejs") %>

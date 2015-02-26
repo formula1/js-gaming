@@ -19,7 +19,7 @@ function ProviderCompiler(directory,options){
   passport.serializeUser(this.UserModel.serialize);
   passport.deserializeUser(this.UserModel.deserialize);
   var temp = require("./router");
-  this.middleware = temp.middleware();
+  this.middleware = temp.middleware;
   this.renderware = temp.renderware.bind(this);
   this.router = temp.router(this);
 }

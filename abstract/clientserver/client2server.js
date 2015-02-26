@@ -40,7 +40,6 @@ function Server(uri,socket){
   MessageDuplex.call(this, function(message){
     that.socket.send(JSON.stringify(message));
   });
-  this.ready();
 }
 
 util.inherits(Server,MessageDuplex);

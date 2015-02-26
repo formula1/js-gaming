@@ -122,7 +122,7 @@ MessageRouter.prototype.processMessage = function(message,fn){
   };
   var result;
   try{
-    result = fn(message.data,message,next);
+    result = fn(message.data,next,message);
   }catch(e){
     return next(e);
   }

@@ -66,8 +66,17 @@ database.collect(function(e,mongo){
       test.routes(httpserver);
 
       wsserver
-      .on("*",userserver.middleware)
-      .on("/apps",appserver.wsrouter);
+      .use(function(req,res,next){
+        console.log("in socket");
+        next();
+      })
+      .use(userserver.middleware)
+      .use(function(req,res,next){
+        console.log("after user");
+        console.log(req.user);
+        next();
+      })
+      .use(appserver.wsrouter);
 
       var server = new http.Server();
       server.on("request",httpserver);

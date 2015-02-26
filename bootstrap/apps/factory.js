@@ -21,6 +21,8 @@ function startApp(path,next){
     compileFork,
     compileDuplex,
     compilePackage,
+    compileClient,
+    gameConfig
   ],next);
 }
 
@@ -84,18 +86,22 @@ function compilePackage(ret,next){
     fs.readFile(ret.path+"/package.json",function(err,pkg){
       if(err) return next(err);
       try{
-        pkg = JSON.stringify(pkg.toString("utf8"));
+        ret.package = JSON.parse(pkg.toString("utf8"));
       }catch(e){
         return next(e);
       }
-      if(pkg.browser) ret.browser = pkg.browser;
-      if(pkg.client) ret.client = pkg.client;
-      if(!pkg.providerClient || !pkg.browser){
-        return files2JSON(ret,files,next);
-      }
-      validateClient(ret,next);
+      next(void(0),ret,files);
     });
   });
+}
+
+function compileClient(ret,files,next){
+  if(ret.package.browser) ret.browser = ret.package.browser;
+  if(ret.package.client) ret.client = ret.package.client;
+  if(!ret.package.client || !ret.package.browser){
+    return files2JSON(ret,files,next);
+  }
+  validateClient(ret,next);
 }
 
 function files2JSON(ret,files,next){
@@ -156,5 +162,17 @@ function validateReadme(ret,next){
     next(void(0),ret);
   });
 }
+
+function gameConfig(ret,next){
+  if(!ret.package.game){
+    ret.max_players = ret.min_players = 1;
+    return next(void(0),ret);
+  }
+  ret.min_players = ret.package.game.minimum_players||1;
+  ret.max_players = ret.package.game.maximum_players||ret.min_players;
+  if(ret.max_players == "infinity") ret.max_players = Number.POSITIVE_INFINITY;
+  next(void(0),ret);
+}
+
 
 module.exports = startApp;

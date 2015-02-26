@@ -41,3 +41,11 @@ var _log = console.log;
 console.log = function(){
   _log.apply(console,generic("\033[46;30;1mLOG: \033[0m", arguments));
 };
+
+console.ns = function(){
+  var args = Array.prototype.slice.call(arguments,0);
+  var namespace = args.shift().toUpperCase();
+  _log.apply(console,generic("\033[42;30;1m"+namespace+": \033[0m", args));
+};
+
+global.console = console;

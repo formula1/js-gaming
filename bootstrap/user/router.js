@@ -9,23 +9,15 @@ module.exports.renderware = function(req,res,next){
   next();
 };
 
-module.exports.middleware = function(){
-  var router = express.Router();
-  // -----------------
-  // Enable Sessions and cookies
-  // -----------------
-  router.use([
+module.exports.middleware = [
     require("cookie-parser")(config.session.secret),
     session({
       secret: config.session.secret,
       store: new session.MemoryStore()
     }),
     passport.initialize(),
-    passport.session()
-  ]);
-  return router;
-};
-
+    passport.session(),
+];
 
 module.exports.router = function(provider){
   var router = express.Router();

@@ -8,7 +8,6 @@ wsrouter.init = function(req,soc,body){
   if (!websocket.isWebSocket(req)) return;
   console.log("socket");
   req.body = body;
-  //console.log(request);
   this.trigger(req,soc,function(err){
     if(err){
       console.error(err.stack);

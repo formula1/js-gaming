@@ -30,18 +30,20 @@ function MatchMaker(games){
   while(l--){
     game = games[l];
     this.gameIndex[game.name] = {
-      min_players:game.minplayers,
+      min_players:game.min_players,
+      max_players:game.max_players,
       waiting:[]
     };
   }
 }
 
-MatchMaker.prototype.addUser = function(user,query,next){
+MatchMaker.prototype.addUser = function(user,query,res,next){
   var _this = this;
-  var games = applyGameQuery(this.games, query.game);
+  console.log("adding user");
+  var games = applyGameQuery(this.games, query);
   var l = games.length;
   if(!l) return next(new Error("404"));
-  var item = {user:user,query:query,games:games};
+  var item = {user:user,query:query,games:games,res:res};
   if(!query.joinInProgress || !this.needing_players.length){
     return this.addToWaitingList(item,next);
   }
@@ -73,7 +75,7 @@ MatchMaker.prototype.addToWaitingList = function(userItem,next){
   var l = games.length;
   this.waiting_players.push(userItem);
   while(l--){
-    this.gameIndex[games[l]].waiting.push(userItem);
+    this.gameIndex[games[l].name].waiting.push(userItem);
   }
   this.checkForMatch();
   next(void(0), userItem);
@@ -82,7 +84,43 @@ MatchMaker.prototype.addToWaitingList = function(userItem,next){
 MatchMaker.prototype.checkForMatch = function(){
   if(this.isChecking) return;
   this.isChecking = true;
-  process.nextTick(this.createMatch.bind(this));
+  process.nextTick(this.checkForMatchAsync.bind(this));
+};
+MatchMaker.prototype.checkForMatchAsync = function(){
+  var l, ll;
+  var i, ii;
+  var player;
+  var game;
+  var players;
+  for(i=0, l=this.waiting_players.length;i<l;i++){
+    player = this.waiting_players[i];
+    for(ii=0, ll = player.games.length;ii<ll;ii++){
+      game = player.games[ii];
+      players = this.gameIndex[game.name].waiting;
+      // TODO: update this to apply all players' player queries
+      // this should prefer the players first in the queue, but
+      // should start a new game if at all possible
+      players = applyPlayerQuery(players, player.query);
+      if(players.length < game.min_players) continue;
+      while(players.length > game.max_players) players.pop();
+
+      process.nextTick(this.checkForMatchAsync.bind(this));
+      return this.createMatch(players,game);
+    }
+  }
+  this.isChecking = false;
+};
+
+MatchMaker.prototype.createMatch = function(players, game){
+  var i, l;
+  var match_id = Date.now()+"_"+Math.random();
+  for(i=0, l = players.length;i<l;i++){
+    console.log(players[i]);
+    players[i].res(void(0),{game:game.name, match:match_id});
+    this.removeUser(players[i]);
+    players[i] = players[i].user;
+  }
+  return game.dup.trigger("match",{match_id:match_id, players:players});
 };
 
 MatchMaker.prototype.needPlayer = function(matchInfo, game){
@@ -114,42 +152,19 @@ MatchMaker.prototype.deadGame = function(matchid, name){
   //Happens when all players leave
 };
 
-function applyPlayerQuery (players, player_query) {
-  return player_query?_.filter(players, {user:player_query}):players;
-}
-
-function applyGameQuery (games, game_query) {
-  return game_query?_.filter(this.games, game_query):games;
-}
-
-
-MatchMaker.prototype.createMatch = function(){
-  var l, ll, lll;
-  var i, ii, iii;
-  var player;
-  var game;
-  var players;
-  for(i=0, l=this.waiting_players.length;i<l;i++){
-    player = this.waiting_players[i];
-    for(ii=0, ll = player.games.length;ii<ll;ii++){
-      game = player.games[ii];
-      players = game.waiting;
-      // TODO: update this to apply all players' player queries
-      // this should prefer the players first in the queue, but
-      // should start a new game if at all possible
-      players = applyPlayerQuery(players, player.query.player);
-      if(players.length < game.minplayers) continue;
-
-      while(players.length > game.maxplayers) players.pop();
-      for(iii=0, lll = players.length;iii<lll;iii++){
-        players[iii].trigger("newmatch", match);
-        this.removeUser(players[iii]);
-      }
-      process.nextTick(this.createMatch.bind(this));
-      return game.sendNewMatch(players);
-    }
+function applyPlayerQuery (players, query) {
+  if(query && query.player){
+    return _.filter(players, {user:query.player});
   }
-  this.isChecking = false;
-};
+  return players.slice(0);
+}
+
+function applyGameQuery (games, query) {
+  if(query && query.game){
+    return _.filter(games, query.game);
+  }
+  return games.slice(0);
+}
+
 
 module.exports = MatchMaker;

@@ -25,8 +25,8 @@
     $form.on("submit",function(e){
       e.preventDefault();
       if(!MatchMaker.ready) return;
-      $form.serialize();
-      MatchMaker.get("find", function(e,value){
+      data = $form.serialize();
+      MatchMaker.get("find", data, function(e,value){
         var frame = $("<div><iframe "+
           "src=\"<%-routePaths.apps%>/"+value.gamename+"/"+value.id+"\""+
           +" ></iframe></div>"

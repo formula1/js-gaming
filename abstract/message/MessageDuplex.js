@@ -32,10 +32,12 @@ MessageDuplex.prototype.constructor = MessageDuplex;
 MessageDuplex.prototype.handleMessage = function(message,user){
   console.log(message.originator);
   if(message.originator.indexOf(this.originator) != -1){
-    console.log("return");
+    console.log("MessageAPI-return:");
+    console.log(message);
     this.returnMessage(message);
   }else{
-    console.log("route");
+    console.log("MessageAPI-route:");
+    console.log(message);
     this.routeMessage(message,user);
   }
 };
