@@ -83,9 +83,8 @@ MessageWriter.prototype.listen = function(name, data, callback){
   return p;
 };
 
-MessageWriter.prototype.duplex = function(name){
-	if (! MessageDuplex) MessageDuplex = require("./MessageDuplex");
-  return new MessageDuplex(function(){
+MessageWriter.prototype.duplex = function(name,cb){
+  	return new require("./MessageDuplex")(function(){
 
 	},function(){
 
