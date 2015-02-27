@@ -1,0 +1,98 @@
+@font-face {
+    /* http://www.fontspace.com/jonathan-hill/planer */
+    font-family: "Planer_Reg";
+    src: url(/Planer_Reg.otf) format("opentype");
+}
+
+header {
+    font-family: Planer_Reg, Helvetica, sans-serif;
+    z-index: 9999;
+}
+
+.navbar {
+    background: rgba(0,0,0,0);
+    border: none;
+    margin-bottom: 0;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#navbar-static-top { }
+#navbar a:link    { color: white; }
+#navbar a:visited { color: #CCCCCC; }
+#navbar a#lobby_trigger  { color: orange; }
+
+#navbar a:hover, #navbar a#lobby_trigger:hover  { color: red; }
+#navbar a.current_page, #navbar a.active  { color: chartreuse; }
+
+#chip_count {
+    display: none;
+}
+
+#feedback_message {
+    display: none;
+}
+
+#loader {
+    display: none;
+}
+
+#lobby {
+    background-color: rgba(0,0,0,0);
+    min-width: 250px;
+    position: absolute;
+    display: none;
+    font-size: .8em;
+    text-align: center;
+    z-index: 10;
+}
+
+.dropdown_form {
+    background-color: rgba(0,0,0,.88);
+    color: #CCCCCC;
+    min-width: 200px;
+    position: absolute;
+    display: none;
+    font-size: 1em;
+    padding: 1em;
+    text-align: center;
+}
+
+#report_bug {
+    min-height: 275px;
+    min-width: 300px;
+}
+
+#report_bug_textarea {
+    width: 95%;
+}
+
+#login form {
+    margin-bottom: .5em;
+}
+
+#login #forget_password {
+    margin-bottom: .5em;
+}
+
+#login a:visited {
+    color: #2f96b4;
+}
+
+#login input, #register input {
+    margin-bottom: .5em;
+}
+
+#login label, #register label {
+    display: block;
+}
+
+#login .btn, #register .bn {
+    font-weight: bold;
+}
+
+#account {
+    width: 260px;
+    position: absolute;
+    display: none;
+}
