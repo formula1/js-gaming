@@ -3,6 +3,6 @@ var Message = require('./message');
 
 module.exports = Collection.extend({
     model: Message,
-    url: '/api/messages',
+    url: '/api/message',
     comparator: 'timestamp'
 });

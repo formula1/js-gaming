@@ -12,16 +12,8 @@ var userserver = require("./user");
 //var matchmaker = require("./matchmaker");
 
 
-database.collect(function(e,mongo){
+database.collect(function(e){
   if(e) throw e;
-  mongo.connection.on("disconnection", function(){
-    console.error(arguments);
-    throw new Error("mongo disconnected");
-  });
-  mongo.connection.on("error", function(e){
-    console.error(e);
-    throw e;
-  });
   console.log("Database finished");
   userserver = userserver();
   userserver.collect(function(e,providers){
@@ -57,7 +49,7 @@ database.collect(function(e,mongo){
       // listen for incoming http requests on the port as specified in our config
       httpserver
       .use("/apps",appserver.router)
-      .use("/api",database.router)
+      .use("/api",database.getRouter())
       .use("/auth",userserver.router)
 //      .use("/match",matchmaker.router)
       .use('/temp', function(req,res,next){
