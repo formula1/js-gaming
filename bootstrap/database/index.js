@@ -6,8 +6,7 @@ var MongoAdapter = require('sails-mongo');
 function ModelCompiler(config) {
   if(!(this instanceof ModelCompiler)) return new ModelCompiler(config);
   config = config ? config : require("getconfig");
-  this.mconfig = config.mongodb;
-  this.mconfig.adapter = 'mongo';
+  this.config = config.database;
   this.orm = new Waterline();
 }
 
@@ -26,15 +25,16 @@ ModelCompiler.prototype.collect = function(next){
         console.error('Error while requiring or loading ' + file_name, e);
       }
     });
-      
+    
+    var adapter_name = self.config.adapter_name
+    var adapters = {};
+    adapters[adapter_name] = MongoAdapter;
+    var connections = self.config.connections;
     self.orm.initialize({
-      adapters: {
-        mongo: MongoAdapter
-      },
-      connections: {
-        mongo: self.mconfig
-      }
+      adapters: adapters,
+      connections: connections
     }, function(err, models) {
+      console.log(self.config, err, models);
       self.collections = models.collections;
       self.connections = models.connections;
       cbret.cb(void(0));
