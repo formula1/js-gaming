@@ -1,7 +1,10 @@
 <!doctype html>
 <html>
 <head>
-  <script type="text/javascript" src="/apps/rps/client.js"></script>
+  <style type="text/css">
+    body>div{display:none;}
+    body>.active{display:block;}
+  </style>
 </head>
 <body>
   <div class="winloss">
@@ -11,17 +14,17 @@
     <h1>Press Ready when you are to Start</h1>
     <h1>If the countdown ends, you will timeout</h1>
   </div>
-  <div class="please_wait" style="display:none;">
+  <div class="please_wait" >
     <h1>Starting in...</h1>
   </div>
-  <div class="rps" style="display:none">
+  <div class="rps" >
     <button data-move="1"><h2>Rock</h1></button>
     <button data-move="2"><h2>Paper</h1></button>
     <button data-move="3"><h2>Scissors</h1></button>
     <h1>CHOOSE YOUR WEAPON BEFORE THE COUNTDOWN ENDS</h1>
   </div>
   <h4 class="count_down"></h4>
-  <button class="new_opp"><h4>New Opponent</h4></button>
   <button class="exit"><h4>Exit</h4></button>
+  <script type="text/javascript" src="/apps/rps/client.js"></script>
 </body>
 </html>

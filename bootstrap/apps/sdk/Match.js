@@ -51,8 +51,13 @@ Match.prototype.join = function(client){
   }
   player.open(client);
   _this = this;
-  player.npt(function(){
-    console.log("after npt");
+  player.ntp(function(err){
+    if(err){
+      player.trigger("reopen");
+      player.close(client);
+      return;
+    }
+    console.log("after ntp");
     _this.lag = Math.max(player.lag,_this.lag);
     _this.emit("player-join",player);
     _this.initialize();
@@ -68,6 +73,8 @@ Match.prototype.initialize = function(){
   var l = this.players.length;
   while(l--){
     if(!this.players[l].isOnline || !this.players[l].lag){
+      console.log(this.players[l].isOnline);
+      console.log(this.players[l].lag);
       this._state = Match.UNSTARTED;
       console.log("not init right now");
       return;
@@ -86,6 +93,10 @@ Match.prototype.syncCast = function(event,data){
 };
 
 Match.prototype.syncGet = function(event,data,next){
+  if(typeof data === "function"){
+    next = data;
+    data = void(0);
+  }
   async.each(this.players[l],
     function(item,next){
       item.get(event,data,next);
@@ -94,17 +105,25 @@ Match.prototype.syncGet = function(event,data,next){
 };
 
 Match.prototype.lagCast = function(event,data,next){
+  if(typeof data === "function"){
+    next = data;
+    data = void(0);
+  }
   var l = this.players.length;
   while(l--){
     setTimeout(
       this.players[l].trigger.bind(this.players[l],event,data),
-      this.lag - player.lag
+      this.lag - this.players[l].lag
     );
   }
   setTimeout(next,this.lag+1);
 };
 
 Match.prototype.lagGet = function(event,data,next){
+  if(typeof data === "function"){
+    next = data;
+    data = void(0);
+  }
   var lag = this.lag;
   async.each(this.players[l],
     function(item,next){

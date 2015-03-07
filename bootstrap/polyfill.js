@@ -1,3 +1,4 @@
+require("setimmediate");
 var path = require("path");
 var config = require("getconfig");
 

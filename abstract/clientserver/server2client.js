@@ -10,6 +10,7 @@ function Client(info, socket){
   }
   this.user = info.user;
   this.socket = socket;
+  socket.on("close",this.close.bind(this));
   this.driver = websocket.http(info.request, info.options);
   MessageDuplex.call(this,function(message){
     _this.driver.text(JSON.stringify(message));

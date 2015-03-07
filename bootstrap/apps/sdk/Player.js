@@ -9,7 +9,7 @@ function Player(userjson,client){
   });
   this._id = userjson._id;
   this.user = userjson;
-  this.add("npt",function(){
+  this.add("ntp",function(){
     return Date.now();
   });
   ProxyDuplex.call(this,client);
@@ -31,8 +31,8 @@ Player.prototype.open = function(client){
   console.log("open");
 };
 
-Player.prototype.npt = function(next){
-  console.log("attempting to npt");
+Player.prototype.ntp = function(next){
+  console.log("attempting to ntp");
   var old = Date.now();
   this.get("ntp", function(e,time){
     if(e){

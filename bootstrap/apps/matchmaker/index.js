@@ -85,7 +85,7 @@ MatchMaker.prototype.addToWaitingList = function(userItem,next){
 MatchMaker.prototype.checkForMatch = function(){
   if(this.isChecking) return;
   this.isChecking = true;
-  process.nextTick(this.checkForMatchAsync.bind(this));
+  setImmediate(this.checkForMatchAsync.bind(this));
 };
 MatchMaker.prototype.checkForMatchAsync = function(){
   var l, ll;
@@ -105,7 +105,7 @@ MatchMaker.prototype.checkForMatchAsync = function(){
       if(players.length < game.min_players) continue;
       while(players.length > game.max_players) players.pop();
 
-      process.nextTick(this.checkForMatchAsync.bind(this));
+      setImmediate(this.checkForMatchAsync.bind(this));
       return this.createMatch(players,game);
     }
   }

@@ -3,8 +3,12 @@ var EventEmitter = require("events").EventEmitter;
 
 function Timer(inittime){
   EventEmitter.call(this);
-  this.time = inittime || 0;
-  this.timeChecker =  setInterval(this.updateClock.bind(this), 10);
+  if(inittime){
+    this.time = Date.now() + (inittime || 0);
+    this.timeChecker =  setInterval(this.updateClock.bind(this), 10);
+  }else{
+    this.time = -1;
+  }
   this.expired = false;
   this.on("newListener", this.newListener.bind(this));
 }
@@ -28,9 +32,8 @@ Timer.prototype.setTime = function(newTime){
 };
 
 Timer.prototype.updateClock = function(){
-  var now = Date.now();
-  var time = this.time - now;
-  if(this.time - now <= 0){
+  var time = this.time - Date.now();
+  if(time <= 0){
     this.timeout();
   }else{
     this.emit("tick",time);

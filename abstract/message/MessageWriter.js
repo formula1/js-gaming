@@ -46,7 +46,7 @@ MessageWriter.prototype.stop = function(){
 
 MessageWriter.prototype.returnMessage = function (message) {
   if (this.getListeners(message.id).length === 0)
-    throw new Error("non Existant Message");
+    throw new Error("non Existant Message: "+JSON.stringify(message));
   this.emit(message.id, message.error,message.data);
 };
 
@@ -61,7 +61,6 @@ MessageWriter.prototype.get = function (name, data, cb) {
     data = void(0);
   }
 	var cr = callprom(this,cb);
-  console.log("getting");
   // save callback so we can call it when receiving the reply
 	this._send(this.templateFactory("get", name, cr.cb), data);
 	return cr.ret;
@@ -100,7 +99,6 @@ MessageWriter.prototype._send = function(template,data){
 	var clone = JSON.parse(JSON.stringify(template));
 	clone.data = data;
 	if(this._ready){
-    console.log("sending");
 		this.wSendFn(clone);
 	}else{
 		//if there is an error queue it for later when socket connects

@@ -16,7 +16,8 @@ var app = new MatchHandler(customMatch);
 parentCom.handle.ws("/apps/:game/:matchid",function(req,sock,next){
   if(!req.user) return next("no user");
   var User = new Client(req,sock);
-  process.nextTick(app.joinMatch.bind(app,req.params.matchid,User));
+  console.log("bound user");
+  setImmediate(app.joinMatch.bind(app,req.params.matchid,User));
 });
 
 parentCom.add("match", function(data){

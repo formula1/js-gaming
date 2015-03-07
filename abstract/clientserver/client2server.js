@@ -5,7 +5,7 @@ var url = require("url");
 function Server(uri,socket){
   var that = this;
   var docuri = url.parse(window.location.href);
-  if(typeof uri == "undefined"){
+  if(!uri){
     uri = "";
   }
   if(typeof uri === "object"){

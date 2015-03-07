@@ -1,8 +1,7 @@
 
 var $ = require("jquery");
 var Timer = require("./Timer");
-var Client2ServerCom = require("../../../../../abstract/clientserver/client2server");
-// var Frame2ManagerCom = require("./Frame2ManagerCom");
+var Server = require("../../../../../abstract/clientserver/client2server");
 
 var status = 0;
 
@@ -11,22 +10,24 @@ var $pleasewait = $(".please_wait");
 var $rps = $(".rps");
 var $countdown = $(".count_down");
 
-
 $winloss.find("button").click(isReady);
 $rps.find("button").click(doMove);
 
-var timer = new Timer(30*1000);
+var timer = new Timer();
 
 timer.on("tick",tickCount);
 timer.on("timeout",timeOut);
 
-var GameConsole = new Client2ServerCom();
+var GameConsole = new Server();
 
 GameConsole
-.on("countdown",countdown)
-.on("move", play)
-.on("results",winloss);
-
+.add("countdown",countdown)
+.add("move", play)
+.add("results",winloss)
+.add("ntp",function(){
+  console.log("clientside npt");
+  return Date.now();
+}).add("ready",winloss);
 
 
 function tickCount(time){
@@ -34,48 +35,48 @@ function tickCount(time){
 }
 
 function timeOut(){
-  $countdown.text("Please wait");
-  GameConsole.close();
-  switch(this.status){
-    case 0: $countdown.text("You have Timed Out");
-    return this.game.exit("Timed Out");
-    case 1: $countdown.text("All Opponents have Timed Out");
-    return this.game.setScene("finder_scene");
+  switch(status){
+    case 2: return $countdown.text("Please wait");
+    case 0: $countdown.text("You have Timed Out"); break;
+    case 1: $countdown.text("All Opponents have Timed Out"); break;
   }
+  GameConsole.close();
 }
 
 function isReady(e){
-  $winloss.css("display", "none");
-  $pleasewait.css("display", "block");
-  that.status = 1;
-  this.game.socket.emit("ingame", {cmd:"ready"});
+  $pleasewait.siblings().removeClass("active");
+  $pleasewait.addClass("active");
+  status = 1;
+  GameConsole.trigger("ready");
 }
 
 function countdown(){
   timer.setTime(5*1000);
+  status = 2;
 }
 
 function play(){
   timer.setTime(30*1000);
-  this.status = 0;
-  $please_wait.css("display","none");
-  $rps.css("display","block");
+  status = 0;
+  $rps.siblings().removeClass("active");
+  $rps.addClass("active");
 }
 
 function doMove(e){
-  that.status = 2;
-  that.game.socket.emit("ingame", {cmd:"move",value:$(this).attr("data-move")});
+  status = 2;
+  GameConsole.trigger("move", $(this).attr("data-move"));
 }
 
 function winloss(data){
-  this.status = 0;
-  this.setTime(30*1000);
-  $rps.css("display","none");
+  status = 0;
+  timer.setTime(30*1000);
+  $winloss.siblings().removeClass("active");
   parseResults(data);
-  $winloss.css("display","block");
+  $winloss.addClass("active");
 }
 
 function parseResults(data){
+  if(!data) return;
   if(!data.opp){
     $winloss.find(".wl").text("You won!");
     $winloss.find(".reason").text("because they left.....");

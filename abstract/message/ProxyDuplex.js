@@ -4,7 +4,6 @@ function ProxyDuplex(Duplex){
   this.fallbacks = [];
   var _this = this;
   MessageDuplex.call(this, function(message){
-    console.log("about to send");
     try{
       _this.fallbacks[0].wSendFn(message);
     }catch(e){

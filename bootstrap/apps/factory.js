@@ -31,7 +31,7 @@ function compileFork(ret,next){
   try{
     require.resolve(ret.path);
   }catch(e){
-    return process.nextTick(next.bind(next,e));
+    return setImmediate(next.bind(next,e));
   }
   var fork;
   try{
@@ -135,7 +135,10 @@ function validateClient(ret,next){
 }
 
 function validateBrowser(ret,next){
-  browserify(ret.browser).bundle(function(e,buff){
+  browserify()
+  .add("setimmediate")
+  .add(ret.browser)
+  .bundle(function(e,buff){
     ret.browser = buff;
     next(e,ret);
   });
