@@ -1,6 +1,6 @@
 
 var util = require("util");
-
+var _ = require("lodash");
 var waitingPlayers = [];
 var READY = "ready";
 var MOVE = "move";
@@ -41,10 +41,11 @@ RPSMatch.prototype.verifyAction = function(player,action,data){
 RPSMatch.prototype.reset = function(){
   this.state = "READY";
   this.playerInfo = {};
-  var l = players.length;
+  var l = this.players.length;
   while(l--){
     this.playerInfo[this.players[l]._id] = {move:false,ready:false};
   }
+  console.log("reset match");
   this.timeout = setTimeout(this.triggerTimeout.bind(this,READY),30000);
 };
 
@@ -53,10 +54,12 @@ RPSMatch.prototype.triggerTimeout = function(toVerify){
   var l = this.players.length;
   while(l--){
     if(this.playerInfo[this.players[l]._id][toVerify] === false){
-      this.players[l].boot(this,"timeout",true);
+      this.players[l].removeAllListeners();
+      this.players[l].exit();
       this.players.splice(l,1);
     }
   }
+  console.log("timout triggered");
   return this.tooFewPlayers();
 };
 
@@ -70,6 +73,7 @@ RPSMatch.prototype.tooFewPlayers = function(){
   if(this.players.length > 1) return false;
   clearTimeout(this.timeout);
   this.end();
+  console.log("too few players");
   return true;
 };
 

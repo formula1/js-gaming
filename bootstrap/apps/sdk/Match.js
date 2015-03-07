@@ -55,23 +55,25 @@ Match.prototype.join = function(client){
     console.log("after npt");
     _this.lag = Math.max(player.lag,_this.lag);
     _this.emit("player-join",player);
-    if(_this._state == Match.UNSTARTED){
-      _this.initialize();
-    }
+    _this.initialize();
   });
-  console.log("joined");
 };
 
 Match.prototype.initialize = function(){
+  if(_this._state !== Match.UNSTARTED){
+    return;
+  }
   console.log("initializing");
+  this._state = Match.STARTING;
   var l = this.players.length;
   while(l--){
     if(!this.players[l].isOnline){
+      this._state = Match.UNSTARTED;
       console.log("not init right now");
       return;
     }
   }
-  this._state = MATCH.STARTED;
+  this._state = Match.STARTED;
   this.emit("start");
 };
 
@@ -113,12 +115,14 @@ Match.prototype.lagGet = function(event,data,next){
 
 
 Match.prototype.end = function(){
+  this._state = Match.ENDING;
   var l = this.players.length;
   while(l--){
     this.players[l].removeAllListeners();
     this.players[l].exit();
   }
   this.emit("end",this);
+  this._state = Match.ENDED;
 };
 
 Match.UNSTARTED = -1;

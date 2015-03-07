@@ -31,9 +31,5 @@ if(module.parent){
     console.log("expected # of players: "+data.players.length);
     app.createMatch(data.match_id,data.players);
   });
-
-  process.on("uncaughtException",function(e){
-    console.log(e);
-  });
   process.send("ready");
 }

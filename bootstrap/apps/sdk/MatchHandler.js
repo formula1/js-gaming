@@ -29,7 +29,7 @@ MatchHandler.prototype.createMatch = function(matchid,players){
     console.log("adding queued Player");
     this.matches[matchid].join(this.queuedPlayers.splice(l,1).user);
   }
-  this.matches[matchid].on("end", this.removeMatch.bind(this));
+  this.matches[matchid].on("end", this.removeMatch.bind(this,this.matches[matchid]));
   console.log("created a match");
 };
 
@@ -52,9 +52,7 @@ MatchHandler.prototype.removeMatch = function(match){
     match.players.exit();
   }
   var _this = this;
-  this.matches[match.id].cleanup(function(){
-    delete _this.matches[match.id];
-  });
+  delete _this.matches[match.id];
 };
 
 

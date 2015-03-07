@@ -1,5 +1,5 @@
 
-var ProxyDuplex = require(__root+"/abstract/message/ProxyDuplex");
+var ProxyDuplex = require("../../../abstract/message/ProxyDuplex");
 
 function Player(userjson,client){
   Object.defineProperty(this,"isOnline",{
