@@ -1,12 +1,40 @@
 var http = require("http");
-var child_process = require("child_process");
-var ProcessAbstract = require("../../abstract/process/ProcessAbstract");
-var fork = new ProcessAbstract(child_process.fork(__dirname+"/child",["child"]));
+global.__root = __dirname+"/../..";
+var HandleRouter = require(__root+"/abstract/handle/HandleRouter");
+
+var config = require("getconfig");
+var games = require("./games")
+
+var database = require(__root+"/bootstrap/database")(config);
+var userserver = require(__root+"/bootstrap/user");
+
 var server = new http.Server();
 
-server.on("upgrade",function(req,socket){
+
+var serverRouter = new HandleRouter();
+server.on("upgrade",function(req,soc,body){
   console.log("upgrade");
-  fork.handle.httpSend(req,socket);
+  req.body = body;
+  serverRouter.fromHttp(req,soc,function(err){
+    soc.end();
+    if(err) throw err;
+    throw "404 "+req.url;
+  });
 });
 
-server.listen(3000);
+database.collect(function(e,mongo){
+  if(e) throw e;
+  console.log("Database finished");
+  userserver = userserver(void(0),void(0),{
+
+  });
+  userserver.collect(function(e,providers){
+    if(e) throw e;
+    serverRouter
+      .use(userserver.middleware)
+      .ws("/apps",require("./matchmaker-temp")(games))
+      .ws("/apps/:appname/:matchid",require("./havematch-temp")(games));
+    server.listen(3000);
+    console.log("listining");
+  });
+});

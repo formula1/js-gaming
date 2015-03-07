@@ -8,7 +8,7 @@ var browserify = require("browserify");
 var factory = require("./factory");
 
 
-function ProviderCompiler(directory,options){
+function ProviderCompiler(directory,options,config){
   if (!(this instanceof ProviderCompiler)){
     return new ProviderCompiler(directory);
   }
@@ -19,7 +19,7 @@ function ProviderCompiler(directory,options){
   passport.serializeUser(this.UserModel.serialize);
   passport.deserializeUser(this.UserModel.deserialize);
   var temp = require("./router");
-  this.middleware = temp.middleware;
+  this.middleware = temp.middleware(config);
   this.renderware = temp.renderware.bind(this);
   this.router = temp.router(this);
 }

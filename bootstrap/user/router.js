@@ -1,7 +1,6 @@
 var passport = require("passport");
 var express = require("express");
 var session = require("express-session");
-var config = require("getconfig");
 var url = require("url");
 var UserProvider = require("./models/provider");
 
@@ -11,7 +10,9 @@ module.exports.renderware = function(req,res,next){
   next();
 };
 
-module.exports.middleware = [
+module.exports.middleware = function(config){
+  if(!config) config = require("getconfig");
+  return [
     require("cookie-parser")(config.session.secret),
     session({
       secret: config.session.secret,
@@ -41,7 +42,8 @@ module.exports.middleware = [
         next();
       });
     },
-];
+  ];
+};
 
 module.exports.router = function(provider){
   var router = express.Router();
