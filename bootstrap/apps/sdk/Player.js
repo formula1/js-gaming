@@ -36,8 +36,7 @@ Player.prototype.npt = function(next){
   var old = Date.now();
   this.get("ntp", function(e,time){
     if(e){
-      console.log(e);
-      return this.emit("error",e);
+      return next(e);
     }
     console.log("In the server");
     console.log("inside npt");
@@ -47,11 +46,11 @@ Player.prototype.npt = function(next){
     if(this.lag && this.lag-lag > 50 ){
       return next(new Error("the lag difference is too large"));
     }
-    this.lag = (this.lag+lag)/2;
+    this.lag = this.lag?(this.lag+lag)/2:lag;
     if(this.offset && this.offset-offset > 50 ){
       return next(new Error("the offset difference is too large"));
     }
-    this.offset = (this.offset+offset)/2;
+    this.offset = this.offset?(this.offset+offset)/2:offset;
     next(void(0));
   }.bind(this));
 };

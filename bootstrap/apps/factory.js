@@ -39,34 +39,38 @@ function compileFork(ret,next){
   }catch(e){
     return next(e);
   }
-  var timeout = setTimeout(function(){
-    fork.removeAllListeners();
-    fork.kill();
-    return next(new Error(ret.name+"'s fork process timed out, this may be due to long syncrounous code on initialization'"));
-  }, 5000);
-  fork.once("message",function(m){
+  var errlist, timeout, msglist;
+  errlist = function(e){
     clearTimeout(timeout);
-    fork.removeAllListeners();
+    fork.removeListener("message",msglist);
+    try{
+      fork.kill();
+    }catch(err){
+      //just kill.
+    }
+    return next(e);
+  };
+  msglist = function(m){
+    clearTimeout(timeout);
+    fork.removeListener("error",errlist);
     if(m != "ready"){
       fork.kill();
       return next(new Error("fork process sending messages before initialization"));
     }
     next(void(0),ret,fork);
-  });
-  fork.once("error",function(e){
-    clearTimeout(timeout);
-    fork.removeAllListeners();
-    return next(e);
-  });
+  };
+  fork.once("error",errlist);
+  fork.once("message",msglist);
+  timeout = setTimeout(function(){
+    fork.removeListener("message",msglist);
+    fork.removeListener("error",errlist);
+    fork.kill();
+    return next(new Error(ret.name+"'s fork process timed out, this may be due to long syncrounous code on initialization'"));
+  }, 5000);
 }
 
 function compileProcessAbstract(ret,fork,next){
   ret.fork = new ProcessAbstract(fork);
-  ret.fork.ready();
-  ret.fork.trigger("an_event");
-  ret.fork.add("online",function(){
-    console.log(ret.name+" is still online");
-  });
   next(void(0),ret);
 }
 

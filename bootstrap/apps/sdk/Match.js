@@ -67,7 +67,7 @@ Match.prototype.initialize = function(){
   this._state = Match.STARTING;
   var l = this.players.length;
   while(l--){
-    if(!this.players[l].isOnline){
+    if(!this.players[l].isOnline || !this.players[l].lag){
       this._state = Match.UNSTARTED;
       console.log("not init right now");
       return;

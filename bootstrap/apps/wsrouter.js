@@ -29,10 +29,7 @@ module.exports = function(app){
     game[0].fork.handle.httpSend(
       req,socket
     );
-    setTimeout(function(){
-      game[0].fork.trigger("an_event");
-      game[0].fork.context.send("forcing");
-    },1000);
+    console.log("tried to send");
   });
   return function(req,soc,next){
     router.fromHttp(req,soc,next);

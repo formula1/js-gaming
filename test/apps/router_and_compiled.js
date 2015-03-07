@@ -3,11 +3,10 @@ global.__root = __dirname+"/../..";
 var HandleRouter = require(__root+"/abstract/handle/HandleRouter");
 
 var config = require("getconfig");
-var games = require("./games");
 
 var database = require(__root+"/bootstrap/database")(config);
 var userserver = require(__root+"/bootstrap/user");
-var approuter = require(__root+"/bootstrap/apps/wsrouter");
+var appserver = require(__root+"/bootstrap/apps")();
 
 var server = new http.Server();
 
@@ -31,10 +30,13 @@ database.collect(function(e,mongo){
   });
   userserver.collect(function(e,providers){
     if(e) throw e;
-    serverRouter
-      .use(userserver.middleware)
-      .use(approuter(games));
-    server.listen(3000);
-    console.log("listining");
+    appserver.collect(function(e,applist){
+      if(e) throw e;
+      serverRouter
+        .use(userserver.middleware)
+        .use(appserver.wsrouter);
+      server.listen(3000);
+      console.log("listining");
+    });
   });
 });
