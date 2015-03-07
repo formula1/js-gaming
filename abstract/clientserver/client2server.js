@@ -1,18 +1,21 @@
 var MessageDuplex = require("../message/MessageDuplex.js");
 var url = require("url");
-var util = require("util");
 
 
 function Server(uri,socket){
   var that = this;
   var docuri = url.parse(window.location.href);
+  if(typeof uri == "undefined"){
+    uri = "";
+  }
   if(typeof uri === "object"){
     uri = uri.format(uri); //for error checking
   }
   if(typeof uri === "string"){
     this.url = url.parse(uri);
     if(!this.url.host) this.url.host = docuri.host;
-    if(!this.url.port) this.url.port = 3001;
+    if(!this.url.port) this.url.port = docuri.port;
+    if(!this.url.pathname) this.url.pathname = docuri.pathname;
     if(!this.url.pass) this.url.pass = docuri.pass;
     this.url.protocol = "ws:";
   }else{
@@ -20,6 +23,7 @@ function Server(uri,socket){
   }
   if(!socket){
     try {
+      console.log(url.format(this.url));
       this.socket = new WebSocket(url.format(this.url));
     } catch (exception) {
       console.log('Error' + exception);
@@ -37,12 +41,20 @@ function Server(uri,socket){
     }
   };
   this.socket.onclose = this.stop.bind(this);
+  this.socket.onerror = this.emit.bind(this,"error");
   MessageDuplex.call(this, function(message){
     that.socket.send(JSON.stringify(message));
   });
 }
 
-util.inherits(Server,MessageDuplex);
+Server.prototype = Object.create(MessageDuplex.prototype);
+Server.prototype.constructor = Server;
+
+Server.prototype.close = function(){
+  this.removeAllListeners();
+  this._returns.removeAllListeners();
+  this.socket.close();
+};
 
 Server.prototype.export = function(){
   this.stop();

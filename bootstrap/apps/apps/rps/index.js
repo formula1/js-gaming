@@ -6,23 +6,25 @@ var READY = "ready";
 var MOVE = "move";
 var COUNTDOWN = "countdown";
 
-function RPSMatch(players,matchpool){
-  Match.call(this,players,matchpool);
-  this.state = READY;
+function RPSMatch(players){
+  console.log("constructing rps");
+  Match.call(this,players);
   this.timeout = void(0);
   this.playerInfo = {};
-  var l = players.length;
+  var l = this.players.length;
   while(l--){
     this.playerInfo[players[l]._id] = {};
+    this.players[l].on("exit",this.playerExit.bind(this));
+    this.players[l].on("action",this.handleAction.bind(this));
   }
-  //this.on("enter",function(){});
-  this.on("action",this.handleAction.bind(this));
-  this.on("exit",this.playerExit.bind(this));
+  this.on("start",this.reset.bind(this));
+  console.log("finished constructing rps");
 }
 
 util.inherits(RPSMatch,Match);
 
 RPSMatch.prototype.handleAction = function(player,action,data){
+  if(!this.verifyAction(player,action,data)) return;
   switch(action){
     case READY: return this.playerReady(player);
     case MOVE: return this.move(player,data);
@@ -36,12 +38,8 @@ RPSMatch.prototype.verifyAction = function(player,action,data){
   return false;
 };
 
-//Once your in, your in. Once you leave, your out.
-RPSMatch.prototype.verifyEntry = function(player){
-  return false;
-};
-
 RPSMatch.prototype.reset = function(){
+  this.state = "READY";
   this.playerInfo = {};
   var l = players.length;
   while(l--){
@@ -71,18 +69,11 @@ RPSMatch.prototype.playerExit = function(player){
 RPSMatch.prototype.tooFewPlayers = function(){
   if(this.players.length > 1) return false;
   clearTimeout(this.timeout);
-  this.delete();
+  this.end();
   return true;
 };
 
-RPSMatch.findMatch = function(player){
-  if(waitingPlayers.length > 0){
-    return new RPSMatch([waitingPlayers.shift(),player]);
-  }
-  waitingPlayers.push(player);
-};
-
-RPSMatch.playerReady = function(player){
+RPSMatch.prototype.playerReady = function(player){
   if(this.playerInfo[player._id].ready) return;
   this.playerInfo[player._id].ready = true;
   var l = this.players.length;
@@ -112,7 +103,6 @@ RPSMatch.prototype.move = function(player,data){
 };
 
 RPSMatch.prototype.finish = function(){
-  this.state = READY;
   this.quickCast({cmd:"results",results:this.playerInfo});
   if(!this.triggerTimeout(MOVE)){
     this.reset();

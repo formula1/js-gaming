@@ -6,8 +6,8 @@ var EventEmitter = require("events").EventEmitter;
 
 function DisplayMyName()
 {
-  return arguments.callee.toString()
-  .substr('function '.length)
+  myName =  arguments.callee.toString();
+  return myName.substr('function '.length)
   .substr(0, myName.indexOf('('));
 }
 

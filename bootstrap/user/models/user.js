@@ -42,7 +42,6 @@ UserSchema.static("Permission", function(req,next){
 });
 
 UserSchema.static("serialize", function(user,next){
-  console.log('in User.serialize, user is', user);
   if(user && user._id) return next(void(0), user._id);
   next(new Error("no user"));
 });

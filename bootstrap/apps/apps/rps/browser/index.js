@@ -1,7 +1,7 @@
 
 var $ = require("jquery");
 var Timer = require("./Timer");
-var Client2ServerCom = require("./Client2ServerCom");
+var Client2ServerCom = require("../../../../../abstract/clientserver/client2server");
 // var Frame2ManagerCom = require("./Frame2ManagerCom");
 
 var status = 0;

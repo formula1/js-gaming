@@ -6,7 +6,7 @@ var markdown = require("markdown").markdown;
 var express = require("express");
 var browserify = require("browserify");
 var child_process = require("child_process");
-var MessageDuplex = require(__root+"/abstract/message/MessageDuplex");
+var ProcessAbstract = require(__root+"/abstract/process/ProcessAbstract");
 
 
 
@@ -18,11 +18,11 @@ function startApp(path,next){
       ret.name = path.split("/").pop();
       next(void(0),ret);
     },
-    compileFork,
-    compileDuplex,
     compilePackage,
     compileClient,
-    gameConfig
+    gameConfig,
+    compileFork,
+    compileProcessAbstract,
   ],next);
 }
 
@@ -33,46 +33,40 @@ function compileFork(ret,next){
   }catch(e){
     return process.nextTick(next.bind(next,e));
   }
+  var fork;
   try{
-    ret.fork = child_process.fork(__root+"/app_framework/sdk",[ret.path],{
-      cwd:ret.path,
-      env:{TERM:process.env.TERM}
-    });
+    fork = child_process.fork(__dirname+"/sdk",[ret.path],{cwd:ret.path});
   }catch(e){
     return next(e);
   }
   var timeout = setTimeout(function(){
-    ret.fork.removeAllListeners();
-    ret.fork.kill();
+    fork.removeAllListeners();
+    fork.kill();
     return next(new Error(ret.name+"'s fork process timed out, this may be due to long syncrounous code on initialization'"));
   }, 5000);
-  ret.fork.once("message",function(m){
+  fork.once("message",function(m){
     clearTimeout(timeout);
-    ret.fork.removeAllListeners();
+    fork.removeAllListeners();
     if(m != "ready"){
-      ret.fork.kill();
+      fork.kill();
       return next(new Error("fork process sending messages before initialization"));
     }
-    next(void(0),ret);
+    next(void(0),ret,fork);
   });
-  ret.fork.once("error",function(e){
+  fork.once("error",function(e){
     clearTimeout(timeout);
-    ret.fork.removeAllListeners();
+    fork.removeAllListeners();
     return next(e);
   });
 }
 
-function compileDuplex(ret,next){
-  ret.dup = new MessageDuplex(function(message){
-    ret.fork.send({type:"forkdup", msg:message});
+function compileProcessAbstract(ret,fork,next){
+  ret.fork = new ProcessAbstract(fork);
+  ret.fork.ready();
+  ret.fork.trigger("an_event");
+  ret.fork.add("online",function(){
+    console.log(ret.name+" is still online");
   });
-  ret.fork.on("message", function(message,handle){
-    if(message.type && message.type === "forkdup"){
-      ret.dup.handleMessage(message.msg);
-    }
-  });
-  ret.dup.ready();
-  ret.dup.trigger("an_event");
   next(void(0),ret);
 }
 

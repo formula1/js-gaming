@@ -12,6 +12,6 @@ module.exports = function(req,res,next){
   b.require(__root+"/abstract/window/WindowManager", {expose:"WindowManager"});
   b.require(__root+"/abstract/window/WindowAbstract", {expose:"WindowAbstract"});
   b.require(__root+"/abstract/clientserver/client2server", {expose:"Server"});
-  b.require(__root+"/abstract/network/NetworkHost", {expose:"Network"});
+//  b.require(__root+"/abstract/network/NetworkHost", {expose:"Network"});
   b.bundle().pipe(res);
 };

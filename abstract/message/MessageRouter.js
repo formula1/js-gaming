@@ -63,6 +63,12 @@ MessageRouter.prototype.add = function(keymethod){
   return this;
 };
 
+MessageRouter.prototype.remove = function(key){
+  that.removeListener(key);
+  return this;
+};
+
+
 /**
   The method to call after you have processed the message the io has recieved.
   @memberof MessageRouter

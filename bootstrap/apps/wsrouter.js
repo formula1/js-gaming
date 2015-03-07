@@ -1,11 +1,11 @@
 var url = require("url");
-var SocketRouter = require(__root+"/abstract/abstract/SocketRouter");
+var SocketRouter = require(__root+"/abstract/handle/HandleRouter");
 var Client = require(__root+"/abstract/clientserver/server2client");
 var _ = require("lodash");
 
 module.exports = function(app){
   var router = new SocketRouter();
-  router.on("/apps",function(req,socket,next){
+  router.ws("/apps",function(req,socket,next){
     console.log("hit apps");
     if(!req.user) return next(new Error("matchmaking requires login"));
     console.log("have user");
@@ -14,7 +14,6 @@ module.exports = function(app){
     u.add("find",function(query,res){
       app.matchmaker.addUser(u.user,query,res,function(err,item){
         if(err) return res(err);
-        console.log("added user");
         u.add("stop",function(){
           app.matchmaker.removeUser(item,next);
         }).on("close",function(){
@@ -22,17 +21,20 @@ module.exports = function(app){
         });
       });
     });
-  }).on("/apps/:appname/:matchid",function(req,socket){
-    var body = req.body;
-    delete req.body;
-    var user = req.user.toJSON();
-    delete req.user;
-    _.where(app.compiled, {name:req.params.name}).fork.send(
-      {type:"socket", request:req, body:body, user:user},
-      socket
+  }).ws("/apps/:appname/:matchid",function(req,socket,next){
+    var game = _.where(app.compiled, {name:req.params.appname});
+    console.log("game.length == "+game.length);
+    if(game.length === 0) return next();
+    req.user = req.user.toJSON();
+    game[0].fork.handle.httpSend(
+      req,socket
     );
+    setTimeout(function(){
+      game[0].fork.trigger("an_event");
+      game[0].fork.context.send("forcing");
+    },1000);
   });
   return function(req,soc,next){
-    router.trigger(req,soc,next);
+    router.fromHttp(req,soc,next);
   };
 };

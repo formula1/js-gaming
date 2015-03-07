@@ -1,5 +1,6 @@
 
 var _ = require("lodash");
+var random = require(__root+"/abstract/random-gen");
 
 /*
 
@@ -113,14 +114,14 @@ MatchMaker.prototype.checkForMatchAsync = function(){
 
 MatchMaker.prototype.createMatch = function(players, game){
   var i, l;
-  var match_id = Date.now()+"_"+Math.random();
+  var match_id = random();
+  console.log("creating match");
   for(i=0, l = players.length;i<l;i++){
-    console.log(players[i]);
     players[i].res(void(0),{game:game.name, match:match_id});
     this.removeUser(players[i]);
     players[i] = players[i].user;
   }
-  return game.dup.trigger("match",{match_id:match_id, players:players});
+  return game.fork.trigger("match",{match_id:match_id, players:players});
 };
 
 MatchMaker.prototype.needPlayer = function(matchInfo, game){

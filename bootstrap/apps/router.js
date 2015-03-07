@@ -16,30 +16,21 @@ module.exports = function(ob){
     if(!req.user) return res.redirect("/auth/login");
     next();
   });
-  router.get(/\/?/, function(req,res,next){
+  router.get(/^\/?$/, function(req,res,next){
     res.locals.playerMatches = [];
     res.render("game/index");
-  });
-  router.get("/:appname", function(req,res,next){
-    console.log("appname");
-    res.locals.theApp = req.theApp;
-    res.render("game/index");
-  });
-  router.get("/:appname/join", function(req,res,next){
-    console.log("joining list");
-    res.locals.theApp = req.theApp;
-    res.render("game/index");
-  });
-  router.get("/:appname/public", function(req,res,next){
-    console.log("public");
-    res.sendFile(req.theApp.path+"/public/index.html");
   });
   router.get("/:appname/public/*", function(req,res,next){
     req.theApp.public(req,res,next);
   });
   router.get("/:appname/client.js", function(req,res,next){
+    console.log("client");
     res.status(200).setHeader('content-type', 'application/javascript');
     res.send(req.theApp.browser);
+  });
+  router.get("/:appname/:match", function(req,res,next){
+    console.log("public");
+    res.sendFile(req.theApp.path+"/public/index.html");
   });
   /*
   router.ws("/:appname",function(req,res,next){

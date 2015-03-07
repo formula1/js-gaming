@@ -1,0 +1,130 @@
+
+var MersenneTwister = require('mersennetwister');
+var Player = require("./Player");
+var EventEmitter = require("events").EventEmitter;
+var async = require("async");
+
+function Match(players_info){
+  console.log("constructing match");
+  this.random = new MersenneTwister();
+  var players = this.players = [];
+  var _this = this;
+  players_info.forEach(function(player){
+    player = new Player(player);
+    players.push(player);
+    player.on("error",function(e){
+      _this.emit("player-error", e, player);
+    });
+    player.on("exit",function(e){
+      var l = _this.players.length;
+      while(l--){
+        if(_this.players[l] == player){
+          _this.players.splice(l,1);
+          break;
+        }
+      }
+      _this.emit("player-exit",player);
+    });
+  });
+  this.lag = 0;
+  this.data = {};
+  this._state = Match.UNSTARTED;
+  console.log("finished constructing match");
+}
+
+Match.prototype = Object.create(EventEmitter.prototype);
+Match.prototype.constructor = Match;
+
+Match.prototype.join = function(client){
+  console.log("attempting to join");
+  var l = this.players.length;
+  var player = false;
+  while(l--){
+    if(this.players[l]._id == client.user._id){
+      player = this.players[l];
+      break;
+    }
+  }
+  if(!player){
+    console.log("this is not a player I want");
+    return client.close();
+  }
+  player.open(client);
+  _this = this;
+  player.npt(function(){
+    console.log("after npt");
+    _this.lag = Math.max(player.lag,_this.lag);
+    _this.emit("player-join",player);
+    if(_this._state == Match.UNSTARTED){
+      _this.initialize();
+    }
+  });
+  console.log("joined");
+};
+
+Match.prototype.initialize = function(){
+  console.log("initializing");
+  var l = this.players.length;
+  while(l--){
+    if(!this.players[l].isOnline){
+      console.log("not init right now");
+      return;
+    }
+  }
+  this._state = MATCH.STARTED;
+  this.emit("start");
+};
+
+
+Match.prototype.syncCast = function(event,data){
+  var l = this.players.length;
+  while(l--){
+    this.players[l].trigger(event,data);
+  }
+};
+
+Match.prototype.syncGet = function(event,data,next){
+  async.each(this.players[l],
+    function(item,next){
+      item.get(event,data,next);
+    },next
+  );
+};
+
+Match.prototype.lagCast = function(event,data,next){
+  var l = this.players.length;
+  while(l--){
+    setTimeout(
+      this.players[l].trigger.bind(this.players[l],event,data),
+      this.lag - player.lag
+    );
+  }
+  setTimeout(next,this.lag+1);
+};
+
+Match.prototype.lagGet = function(event,data,next){
+  var lag = this.lag;
+  async.each(this.players[l],
+    function(item,next){
+      setTimeout(item.get.bind(item,event,data,next), lag - item.lag);
+    },next
+  );
+};
+
+
+Match.prototype.end = function(){
+  var l = this.players.length;
+  while(l--){
+    this.players[l].removeAllListeners();
+    this.players[l].exit();
+  }
+  this.emit("end",this);
+};
+
+Match.UNSTARTED = -1;
+Match.STARTING = 0;
+Match.STARTED = 1;
+Match.ENDING = 2;
+Match.ENDED = 3;
+
+module.exports = Match;

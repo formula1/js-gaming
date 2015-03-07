@@ -2,6 +2,8 @@ var passport = require("passport");
 var express = require("express");
 var session = require("express-session");
 var config = require("getconfig");
+var url = require("url");
+var UserProvider = require("./models/provider");
 
 module.exports.renderware = function(req,res,next){
   res.locals.user = req.user;
@@ -17,6 +19,28 @@ module.exports.middleware = [
     }),
     passport.initialize(),
     passport.session(),
+    function(req,res,next){
+      if(req.user) return next();
+      var auth = req.headers.authorization;
+      if(!auth) return next();
+      auth = auth.split(" ");
+      if(auth.length != 2) return next();
+      if(auth[0] != "Basic") return next();
+      auth = new Buffer(auth[1], 'base64').toString('ascii').split(":");
+      if(auth.length != 2) return next();
+      var profile = {
+        provider:"local",
+        id:auth[0],
+        displayName:auth[0],
+        password:auth[1]
+      };
+      UserProvider.findAndValidate(void(0),void(0),profile,function(err,user){
+        if(err) return next();
+        if(!user) return next();
+        req.user = user;
+        next();
+      });
+    },
 ];
 
 module.exports.router = function(provider){

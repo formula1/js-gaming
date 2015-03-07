@@ -1,15 +1,16 @@
 
 var EventEmitter = require("events").EventEmitter;
-var util = require("util");
 
 function Timer(inittime){
+  EventEmitter.call(this);
   this.time = inittime || 0;
   this.timeChecker =  setInterval(this.updateClock.bind(this), 10);
   this.expired = false;
   this.on("newListener", this.newListener.bind(this));
 }
 
-util.inherits(Timer,EventEmitter);
+Timer.prototype = Object.create(EventEmitter.prototype);
+Timer.prototype.constructor = Timer;
 
 Timer.prototype.newListener = function(event,fn){
   if(event == "timeout" && this.expired) return fn();

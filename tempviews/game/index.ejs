@@ -36,7 +36,7 @@
           MatchMaker.get("find", querystring.parse($form.serialize()), function(e,value){
             if(e) throw e;
             var frame = $("<div><iframe "+
-              "src=\"<%-routePaths.apps%>/"+value.gamename+"/"+value.id+"\""+
+              "src=\"<%-routePaths.apps%>/"+value.game+"/"+value.match+"\""+
               " ></iframe></div>"
             );
             $matches.append(frame);

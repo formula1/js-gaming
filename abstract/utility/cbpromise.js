@@ -1,3 +1,8 @@
+
+if(!Promise){
+  var Promise = require("bluebird");
+}
+
 module.exports = function(ret,cb){
   if(cb) return {cb:cb,ret:ret};
   var rej;

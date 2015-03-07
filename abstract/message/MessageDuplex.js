@@ -1,6 +1,5 @@
 var MessageRouter = require("./MessageRouter.js");
 var MessageWriter = require("./MessageWriter.js");
-var util = require("util");
 
 function MessageDuplex(wSendFn, rSendFn){
   if(!rSendFn) rSendFn = wSendFn;
@@ -23,7 +22,7 @@ function MessageDuplex(wSendFn, rSendFn){
   MessageWriter.call(this, wSendFn);
 }
 MessageDuplex.prototype = Object.create(MessageWriter.prototype);
-MessageDuplex.prototype.rSendFn = MessageRouter.prototype.rSend;
+MessageDuplex.prototype.rSendFn = MessageRouter.prototype.rSendFn;
 MessageDuplex.prototype.add = MessageRouter.prototype.add;
 MessageDuplex.prototype.routeMessage = MessageRouter.prototype.routeMessage;
 MessageDuplex.prototype.processMessage = MessageRouter.prototype.processMessage;
@@ -32,12 +31,10 @@ MessageDuplex.prototype.constructor = MessageDuplex;
 MessageDuplex.prototype.handleMessage = function(message,user){
   console.log(message.originator);
   if(message.originator.indexOf(this.originator) != -1){
-    console.log("MessageAPI-return:");
-    console.log(message);
+    console.log("MessageAPI-return");
     this.returnMessage(message);
   }else{
-    console.log("MessageAPI-route:");
-    console.log(message);
+    console.log("MessageAPI-route");
     this.routeMessage(message,user);
   }
 };

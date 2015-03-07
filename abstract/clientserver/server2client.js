@@ -1,5 +1,4 @@
 var MessageDuplex = require("../message/MessageDuplex.js");
-var util = require("util");
 var websocket = require('websocket-driver');
 
 function Client(info, socket){
@@ -27,7 +26,10 @@ function Client(info, socket){
     }
   });
   this.driver.on('error', this.emit.bind(this,"error"));
-  this.driver.on("close", this.stop.bind(this));
+  this.driver.on("close", function(){
+    _this.stop();
+    _this.emit("close");
+  });
   socket.pipe(this.driver.io).pipe(socket);
   if(info.readyState === -1){
     if(info.body){
@@ -42,6 +44,12 @@ function Client(info, socket){
 }
 Client.prototype = Object.create(MessageDuplex.prototype);
 Client.prototype.constructor = Client;
+
+Client.prototype.close = function(){
+  this.removeAllListeners();
+  this._returns.removeAllListeners();
+  this.driver.close();
+};
 
 Client.prototype.export = function(){
   this.stop();
@@ -60,7 +68,7 @@ Client.parseFromRequest = function(req){
   var info = {};
   info.body = req.body;
   if(req.user){
-    info.user = req.user.toJSON();
+    info.user = req.user;
     delete req.user;
   }else{
     info.user = "anonymous";

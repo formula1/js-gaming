@@ -13,7 +13,7 @@ function AppCompiler(directory){
   this.directory = directory?directory:__dirname+"/apps";
   this.compiled = [];
   this.router = require("./router")(this);
-  this.wsrouter = require("./matchmaker/wsrouter.js")(this);
+  this.wsrouter = require("./wsrouter.js")(this);
   this.renderware = function(req,res,next){
     res.locals.appsList = _this.compiled;
     next();

@@ -56,7 +56,12 @@ MessageWriter.prototype.trigger = function(name,data){
 };
 
 MessageWriter.prototype.get = function (name, data, cb) {
+  if(typeof data == "function"){
+    cb = data;
+    data = void(0);
+  }
 	var cr = callprom(this,cb);
+  console.log("getting");
   // save callback so we can call it when receiving the reply
 	this._send(this.templateFactory("get", name, cr.cb), data);
 	return cr.ret;
@@ -95,9 +100,11 @@ MessageWriter.prototype._send = function(template,data){
 	var clone = JSON.parse(JSON.stringify(template));
 	clone.data = data;
 	if(this._ready){
+    console.log("sending");
 		this.wSendFn(clone);
 	}else{
 		//if there is an error queue it for later when socket connects
+    console.log("queueing");
 		this.queue.push(clone);
 	}
 };

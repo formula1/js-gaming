@@ -52,24 +52,28 @@ UserProviderSchema.static("applyToUser",function(user, token, tokenSecret, profi
   });
 });
 
-UserProviderSchema.static("findOrCreateUser",function(token, tokenSecret, profile, next){
+UserProviderSchema.static("findAndValidate",function(token, tokenSecret, profile, next){
   UserProvider
   .findOne({profile_id:profile.provider+"-"+profile.id})
   .populate('user')
   .exec(function(err,provider){
     if(err) return next(err);
-    if(provider){
-      console.log("found a provider");
-      if(provider.pass){
-        if(provider.pass != profile.password)
-          return next("passwords are incorrect");
-      }
-      provider.user.provider = profile.provider;
-      provider.user.save(function(err){
-        next(err,provider.user,provider);
-      });
-      return;
+    if(!provider) return next();
+    console.log("found a provider");
+    if(provider.pass){
+      if(provider.pass != profile.password)
+        return next("passwords are incorrect");
     }
+    provider.user.provider = profile.provider;
+    provider.user.save(function(err){
+      next(err,provider.user,provider);
+    });
+  });
+});
+UserProviderSchema.static("findOrCreateUser",function(token, tokenSecret, profile, next){
+  UserProvider.findAndValidate(token, tokenSecret, profile, function(err,user,provider){
+    if(err) return next(err,user,provider);
+    if(user && provider) return next(err,user,provider);
     console.log("create user");
     User.create({
       username: profile.displayName,
