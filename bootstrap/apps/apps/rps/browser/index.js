@@ -4,6 +4,7 @@ var Timer = require("./Timer");
 var Server = require("../../../../../abstract/clientserver/client2server");
 
 var status = 0;
+var me;
 
 var $winloss = $(".winloss");
 var $pleasewait = $(".please_wait");
@@ -21,13 +22,17 @@ timer.on("timeout",timeOut);
 var GameConsole = new Server();
 
 GameConsole
+.add("ready",winloss)
 .add("countdown",countdown)
 .add("move", play)
-.add("results",winloss)
+.add("results",parseResults)
 .add("ntp",function(){
   console.log("clientside npt");
   return Date.now();
-}).add("ready",winloss);
+}).add("me",function(data){
+  me = data;
+  return true;
+});
 
 
 function tickCount(time){
@@ -71,23 +76,32 @@ function winloss(data){
   status = 0;
   timer.setTime(30*1000);
   $winloss.siblings().removeClass("active");
-  parseResults(data);
   $winloss.addClass("active");
 }
 
 function parseResults(data){
   if(!data) return;
-  if(!data.opp){
+  console.log(data);
+  var meval, oppval;
+  console.log(me);
+  for(var i in data){
+    if(i == me._id){
+      meval = data[i].move;
+    }else{
+      oppval = data[i].move;
+    }
+  }
+  if(oppval === false){
     $winloss.find(".wl").text("You won!");
     $winloss.find(".reason").text("because they left.....");
     $winloss.find("button").css("display","none");
   }else{
-    var you = $rps.find("button[data-move="+data.you+"]>h2").text();
-    var opp = $rps.find("button[data-move="+data.opp+"]>h2").text();
-    if(data.you == data.opp){
+    var you = $rps.find("button[data-move="+meval+"]>h2").text();
+    var opp = $rps.find("button[data-move="+oppval+"]>h2").text();
+    if(you == opp){
       $winloss.find(".wl").text("You tied. :|");
       $winloss.find(".reason").text(you+" equals "+opp);
-    }else if(data.you-data.opp%3 == 1){
+    }else if(meval-oppval%3 == 1){
       $winloss.find(".wl").text("You won! :D");
       $winloss.find(".reason").text("because "+you+" beats "+opp);
     }else{

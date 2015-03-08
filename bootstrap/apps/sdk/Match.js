@@ -53,14 +53,21 @@ Match.prototype.join = function(client){
   _this = this;
   player.ntp(function(err){
     if(err){
+      console.log(err);
       player.trigger("reopen");
       player.close(client);
       return;
     }
     console.log("after ntp");
     _this.lag = Math.max(player.lag,_this.lag);
-    _this.emit("player-join",player);
-    _this.initialize();
+    player.me(function(err){
+      if(err){
+        console.log(err);
+        player.close(client);
+      }
+      _this.emit("player-join",player);
+      _this.initialize();
+    });
   });
 };
 

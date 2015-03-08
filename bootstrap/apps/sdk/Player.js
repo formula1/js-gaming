@@ -51,8 +51,19 @@ Player.prototype.ntp = function(next){
       return next(new Error("the offset difference is too large"));
     }
     this.offset = this.offset?(this.offset+offset)/2:offset;
-    next(void(0));
+    next();
   }.bind(this));
 };
+
+Player.prototype.me = function(next){
+  this.get("me", this.user, function(e,boo){
+    if(e){
+      return next(e);
+    }
+    if(boo !== true) return next("Improper Value");
+    next();
+  }.bind(this));
+};
+
 
 module.exports = Player;

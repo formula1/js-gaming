@@ -29,12 +29,9 @@ MessageDuplex.prototype.processMessage = MessageRouter.prototype.processMessage;
 MessageDuplex.prototype.constructor = MessageDuplex;
 
 MessageDuplex.prototype.handleMessage = function(message,user){
-  console.log(message.originator);
   if(message.originator.indexOf(this.originator) != -1){
-    console.log("MessageAPI-return");
     this.returnMessage(message);
   }else{
-    console.log("MessageAPI-route");
     this.routeMessage(message,user);
   }
 };
