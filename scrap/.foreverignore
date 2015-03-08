@@ -1,0 +1,24 @@
+# Ignore git repos
+.git
+**/.git
+**/.git/*
+**/.git/**/*
+
+# Ignore public web files
+**/public/**/*
+
+#**/*.css
+#**/public/**/*.js
+#**/public/**/*.png
+#**/public/**/*.jpeg
+
+
+**/*.log
+**/*.html
+**/*.css
+
+**/*.sublime-project
+**/*.sublime-workspace
+
+# Ignore HandRanks.dat
+HandRanks.dat

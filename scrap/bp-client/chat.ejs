@@ -1,0 +1,15 @@
+<div id="chat_messages">
+</div>
+              
+<form id="chat_form">
+    <input type="text" id="chat_sender" 
+        <% if (locals.username) { %>
+            value="<%= locals.username %>"
+        <% }
+          else { %>
+          value= "Guest"
+          <% } %>
+    readonly />
+    <input type="text" id="chat_message" placeholder="Message" />
+    <button input type="submit" id="chat_submit"  class="btn btn-inverse">Send</button>
+</form>

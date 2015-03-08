@@ -1,0 +1,48 @@
+<!-- table_list.ejs - Requires /js/table_list.js -->
+<div id="currency-switch" class="switch switch-mega"
+     data-on="success" data-on-label="Play for funbucks (play money)"
+     data-off="warning" data-off-label="Play for satoshi (Bitcoins)">
+  <input type="checkbox" checked />
+</div>
+<table id="table_list" class="table_list">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Blinds (Small / Big)</th>
+      <th>Currency</th>
+      <th># Players</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%
+    var i, len
+      , table_game, game, name, table_id
+      , constants, CURRENCY_ABBREV, CURRENCY_PER_CHIP
+      , SMALL_BLIND, BIG_BLIND, MIN_CHIPS, MAX_CHIPS
+      , num_seats_taken, MAX_PLAYERS;
+
+    for (i = 0, len = locals.table_games.length; i < len; i++ ) {
+      table_game = locals.table_games[i];
+      game = table_game.game;
+      name = table_game.name;
+      table_id = table_game.table_id;
+      constants = game.constants();
+      CURRENCY_ABBREV = game.CURRENCY_ABBREV;
+      CURRENCY_PER_CHIP = game.CURRENCY_PER_CHIP;
+      SMALL_BLIND = game.roundNumCurrency(game.SMALL_BLIND * CURRENCY_PER_CHIP);
+      BIG_BLIND = game.roundNumCurrency(game.BIG_BLIND * CURRENCY_PER_CHIP);
+      MIN_CHIPS = game.roundNumCurrency(game.MIN_CHIPS * CURRENCY_PER_CHIP);
+      MAX_CHIPS = game.roundNumCurrency(game.MAX_CHIPS * CURRENCY_PER_CHIP);
+
+      num_seats_taken = table_game.num_seats_taken;
+      MAX_PLAYERS = game.MAX_PLAYERS;
+    %>
+      <tr id="<%= name %>">
+        <td> <%= table_id %> </td>
+        <td> <%= SMALL_BLIND %> / <%= BIG_BLIND %> </td>
+        <td> <%= game.CURRENCY %> </td>
+        <td> <span class="num_players"><%= num_seats_taken %></span> / <%= MAX_PLAYERS %> </td>
+      </tr> 
+   <% } %>
+  </tbody>
+</table>
