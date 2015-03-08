@@ -154,11 +154,10 @@ MatchMaker.prototype.deadGame = function(matchid, name){
 };
 
 function applyPlayerQuery (players, query) {
-  var ret = _.uniq(players, "_id");
   if(query && query.player){
-    return _.filter(ret, {user:query.player});
+    return _.filter(players, {user:query.player});
   }
-  return ret;
+  return players.slice(0);
 }
 
 function applyGameQuery (games, query) {
