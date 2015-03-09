@@ -46,13 +46,14 @@ MatchHandler.prototype.joinMatch = function(matchid, user){
 };
 
 MatchHandler.prototype.removeMatch = function(match){
-  console.log("removing match");
   var l = match.players.length;
   while(l--){
-    match.players.exit();
+    match.players[l].exit();
   }
   var _this = this;
   delete _this.matches[match.id];
+  console.log("removed match");
+
 };
 
 

@@ -19,6 +19,7 @@ Player.prototype = Object.create(ProxyDuplex.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.exit = function(){
+  this.trigger("exit");
   this.closeAll();
   this.emit("exit",this);
 };
