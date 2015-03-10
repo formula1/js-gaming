@@ -32,12 +32,4 @@ app.engine('ejs', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 app.set('views', __root+"/tempviews");
 
-
-// -----------------
-// Enable Sessions and cookies
-// -----------------
-app
-.use(bodyParser.urlencoded({ extended: false }))
-.use(bodyParser.json());
-
 module.exports = app;

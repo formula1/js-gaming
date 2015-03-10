@@ -1,15 +1,29 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
+var Waterline = require('waterline');
 var moment = require("moment");
 
-var MessageSchema = new Schema({
-    sender: {type:String, required:true},
-    message: {type:String, required:true},
-    timestamp: {type:Date, required:true, default:Date.now }
-});
 
-MessageSchema.virtual("readableTimeStamp", function(){
-  return moment(this.timestamp).fromNow();
-});
-
-module.exports = mongoose.model("messages",MessageSchema);
+module.exports = Waterline.Collection.extend(stdSchema({
+  // Define a custom table name
+  connection: "database",
+  identity: 'message',
+  tableName: 'messages',
+  schema: true,
+  attributes: {
+    sender: {
+      type: 'string',
+      required: true
+    },
+    message: {
+      type: 'string',
+      required: true
+    },
+    timestamp: {
+      type: 'string',
+      required: true,
+      defaultsTo:Date.now
+    },
+    readableTimeStamp: function(){
+      return moment(this.timestamp).fromNow();
+    }
+  }
+}));

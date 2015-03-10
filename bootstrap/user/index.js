@@ -16,8 +16,8 @@ function ProviderCompiler(directory,options,config){
   this.directory = directory?directory:__dirname+"/providers";
   this.providers = [];
   this.UserModel = require(__dirname+"/models/user");
-  passport.serializeUser(this.UserModel.serialize);
-  passport.deserializeUser(this.UserModel.deserialize);
+  passport.serializeUser(this.UserModel.Serialize.bind(this.UserModel));
+  passport.deserializeUser(this.UserModel.Deserialize.bind(this.UserModel));
   var temp = require("./router");
   this.middleware = temp.middleware(config);
   this.renderware = temp.renderware.bind(this);

@@ -1,0 +1,34 @@
+{
+    "isDev": true,
+    "isSecure": false,
+    "session": {
+        "host": "localhost",
+        "port": 6379,
+        "db": 1,
+        "secret": "bang!",
+        "secure": false
+    },
+    "http": {
+        "host": "localhost",
+        "port": 3000
+    },
+    "websocket": {
+      "host": "localhost",
+      "port": 4180
+    },
+    "client": {
+        "apiUrl": "http://localhost:3000",
+        "debugMode": true
+    },
+    "passport": {
+      "twitter":{
+        "key":"fake",
+        "secret":"not a secret"
+      }
+    },
+    "mongodb": {
+      "host":"localhost",
+      "port":27017,
+      "database":"jsgaming"
+    }
+}

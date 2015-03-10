@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+</head>
+<body>
+  <ul id="mess"></ul>
+  <script type="text/javascript">
+    var _log = console.log.bind(console);
+    console.log = function(message){
+      document.getElementById("mess").innerHTML += "<li>"+message+"</li>";
+    };
+  </script>
+  <script type="text/javascript" src="/api.js"></script>
+</body>
+</html>

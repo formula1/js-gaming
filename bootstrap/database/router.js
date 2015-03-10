@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var bodyParser = require('body-parser');
 module.exports = function() {
 
 // router will be called as a prototype method of database
@@ -10,19 +11,14 @@ var router = require("express").Router();
 
 router.param('classname', function(req, res, next, classname){
   if(isHidden.test(classname)) return res.status(404).end();
-  try {
-    req.mClass = database.collections[classname];
-    console.log('set req.mClass to', require('util').inspect(req.mClass));
-  }
-  catch(e) {
-    console.error('Error while requiring', classname, e);
-    return res.status(404).end();
-  }
+  if(!(classname in database.orm.collections)) return res.status(404).end();
+  req.mClass = database.orm.collections[classname];
+//  console.log('set req.mClass to', require('util').inspect(req.mClass));
   next();
 });
 
 router.param("id", function(req,res,next,id){
-  req.mClass.findOne({_id:req.params.id}, function(err, doc){
+  req.mClass.findOne({id:req.params.id}, function(err, doc){
     if(err) return next(new Error(err));
     if(!doc) return res.status(404).end();
     req.doc = doc;
@@ -44,47 +40,61 @@ router.use(["/:classname","/:classname/*"],function(req,res,next){
     next();
   });
 });
+
+router
+  .use(bodyParser.urlencoded({ extended: false }))
+  .use(bodyParser.json());
+
+
 router.get("/:classname",function(req,res){
   var ipp = 10;
   if(req.query.ipp){
-    ipp = delete req.query.ipp;
+    ipp = req.query.ipp;
+    delete req.query.ipp;
   }
-  var sort = "-createdOn";
+  var sort = "createdOn DESC";
   if(req.query.sort){
-    sort = delete req.query.sort;
+    sort = req.query.sort;
+    delete req.query.sort;
   }
   var search = req.mClass.defaultSearch||{};
   _.merge(search,req.query||{});
-  console.log('calling find with', search, ipp, sort);
-  req.mClass.find(search).limit(ipp).sort(sort).exec(function(err,docs){
-    console.log('find returns', err, docs);
+  req.mClass.find().where(search).limit(ipp).sort(sort).exec(function(err,docs){
     if(err) return next(err);
-    var l = docs.length;
-    res.send(docs);
+    res.status(200).send(docs);
   });
 });
 router.get("/:classname/:id",function(req,res,next){
   res.status(200).send(req.doc.toObject());
 });
 router.delete("/:classname/:id",function(req,res){
-  req.doc.remove(function(err,doc){
+  req.doc.destroy(function(err,doc){
     if(err) return next(new Error(err));
     if(!doc) return res.status(404).end();
-    res.status(200).send(doc.toObject());
+    res.status(200).send(doc[0]);
   });
 });
 router.put("/:classname/:id",function(req,res){
-  req.doc.update(req.body,function(err, doc){
+  console.log(req.mClass.definition);
+  //I should try to find the schema
+  var keys = _.keys(req.mClass.definition);
+  keys = _.without(keys,"id","createdAt","updatedAt");
+  keys = _.intersection(_.keys(req.body),keys);
+  if(keys.length === 0) return res.status(404).end();
+  keys.forEach(function(key){
+    req.doc[key] = req.body[key];
+  });
+  req.doc.save(function(err, doc){
     if(err) return next(new Error(err));
     if(!doc) return res.status(404).end();
     res.status(200).send(doc.toObject());
   });
 });
-router.post("/:classname",function(req,res){
+router.post("/:classname",function(req,res,next){
   req.mClass.create(req.body,function(err,doc){
     if(err) return next(new Error(err));
     if(!doc) return res.status(404).end();
-    res.redirect(201, req.params.classname+"/"+doc._id);
+    res.redirect(201, req.params.classname+"/"+doc.id);
   });
 });
 router.post("/:classname/:method",function(req,res){
