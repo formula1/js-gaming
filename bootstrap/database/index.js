@@ -34,7 +34,7 @@ ModelCompiler.prototype.collect = function(next){
       adapters: adapters,
       connections: connections
     }, function(err, models) {
-      console.log(self.config, err, models);
+      //console.log(self.config, err, models);
       self.collections = models.collections;
       self.connections = models.connections;
       cbret.cb(void(0));

@@ -9,8 +9,8 @@
     "secure": false
   },
   "http": {
-      "host": "localhost",
-      "port": 3000
+    "host": "localhost",
+    "port": 3000
   },
   "websocket": {
     "host": "localhost",
@@ -36,5 +36,17 @@
   "client": {
     "apiUrl": "http://localhost:3000",
     "debugMode": true,
+    "api": {
+      "adapter_name": "rest",
+      "connections": {
+        "rest": {
+          "adapter": "rest",
+          "hostname": "localhost",
+          "port": 3000,
+          "pathname": "/api", // base api path
+          "type": "json",     // expected response type
+        }
+      }
+    },
   }
 }

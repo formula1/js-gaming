@@ -1,19 +1,12 @@
-var AmpersandModel = require('ampersand-model');
+var Waterline = require('waterline');
 var moment = require('moment');
 
-module.exports = AmpersandModel.extend({
-    props: {
-        id: 'any',
-        sender: ['string', true],
-        message: ['string', true],
-        timestamp: ['date', true, function() { return new Date(); }]
-    },
-    derived : {
-    	readableTimestamp: {
-    		deps: ['timestamp'],
-    		fn : function () {
-    			return moment(this.timestamp).fromNow();
-    		}
-    	}
-    }
-});
+var message_schema = require('app/abstract/models/message');
+
+message_schema.connection = 'rest';
+
+message_schema.attributes.readableTimestamp = function() {
+    return moment(this.timestamp).fromNow();
+};
+
+module.exports = Waterline.Collection.extend(message_schema);

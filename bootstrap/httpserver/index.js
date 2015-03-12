@@ -6,7 +6,6 @@ var compress = require('compression');
 var config = require('getconfig');
 var serveStatic = require('serve-static');
 var app = express();
-var url = require("url");
 
 // a little helper for fixing paths for various environments
 var fixPath = function (pathString) {
@@ -18,6 +17,13 @@ var fixPath = function (pathString) {
 // Configure express
 // -----------------
 app.use(compress());
+// -----------------
+// Set our client config cookie
+// -----------------
+app.use(function (req, res, next) {
+  res.cookie('config', JSON.stringify(config.client));
+  next();
+});
 app.use(serveStatic(fixPath('public')));
 
 // we only want to expose tests in dev
