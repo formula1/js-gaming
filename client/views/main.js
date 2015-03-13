@@ -30,13 +30,13 @@ module.exports = {
         // some additional stuff we want to add to the document head
         document.head.appendChild(domify(templates.head()));
 
-        models.collections.message.find(function(find_err, messages) {
-            if (find_err) throw find_err;
+        /*models.collections.message.find(function(find_err, messages) {
+            if (find_err) throw find_err;*/
             React.render(
-                <ChatView messages={messages} room="lobby" />,
+                <ChatView messages={models.collections.message} room="lobby" />,
                 el
             );
-        });
+        //});
 
         // init and configure our page switcher
         /*this.pageSwitcher = new ViewSwitcher(this.queryByHook('page-container'), {

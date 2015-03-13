@@ -1,17 +1,51 @@
+var _ = require('underscore');
 var React = require('react');
 
 var ChatMessages = React.createClass({
-  render: function() {
+  getInitialState: function() {
+    return {
+      message_list: undefined
+    };
+  },
+  componentDidMount: function() {
+    var self = this;
     var messages = this.props.messages;
-    console.log('ChatMessages.render called, messages is', messages);
-    var messages_markup = messages.map(function(message) {
-      return (
-        <div>
-          <strong>{message.sender}:</strong> 
-          <span>{message.message}</span>
-        </div>
-      );
+    console.log('ChatMessages.componentDidMount called, messages is', messages);
+    if (! _.isObject(messages) || ! _.isFunction(messages.find)) {
+      console.error('ChatMessages without messages!', messages);
+      return;
+    }
+    messages.find({}, function(find_err, fetched_messages) {
+      if (find_err || ! _.isArray(fetched_messages)) {
+        console.error('messages.find returns', find_err, fetched_messages);
+      }
+      else if (! self.isMounted()) {
+        console.warn('ChatMessages no longer mounted whe messages.find returns');
+      }
+      else {
+        console.log('setting fetched_messages to', fetched_messages);
+        self.setState({
+          message_list: fetched_messages
+        });
+      }
     })
+  },
+  render: function() {
+    console.log('ChatMessages.render called, message_list is', this.state.message_list);
+    var messages_markup;
+    if (! _.isArray(this.state.message_list)) {
+      messages_markup = '';
+    }
+    else {
+      messages_markup = this.state.message_list.map(function(message) {
+        return (
+          <div>
+            <strong>{message.sender}:</strong> 
+            <span>{message.message}</span>
+          </div>
+        );
+      });
+    }
     return (
       <div class="chat_messages">
         {messages_markup}
