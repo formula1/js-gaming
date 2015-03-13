@@ -94,7 +94,7 @@ router.post("/:classname",function(req,res,next){
   req.mClass.create(req.body,function(err,doc){
     if(err) return next(new Error(err));
     if(!doc) return res.status(404).end();
-    res.redirect(201, req.params.classname+"/"+doc.id);
+    res.status(200).send(doc.toObject());
   });
 });
 router.post("/:classname/:method",function(req,res){

@@ -7,8 +7,15 @@ var child_process = require("child_process");
 var browserify = require("browserify");
 
 var testModel = require(__dirname+"/testmodel");
+var depModel = require(__dirname+"/modular-approach");
 var database = database(config);
+
+
+//initiate our models
 database.orm.loadCollection(testModel);
+depModel(database.orm);
+
+
 router.get("/api.js",function(req,res,next){
   var b = browserify(__dirname+"/calls");
   res.set('Content-Type', 'application/javascript');
@@ -23,12 +30,17 @@ var server = http.createServer(router);
 
 database.connect(function(err){
   if(err) throw err;
+//  console.log(database.orm.collections.testmodel.waterline.collections.validator);
   server.listen(3000,function(err){
     if(err) throw err;
     database.orm.collections.testmodel
     .destroy({},function(err,docs){
       if(err) throw err;
-      var fork = child_process.fork(__dirname+"/calls");
+      child_process.fork(__dirname+"/calls").on("close",function(){
+        child_process.fork(__dirname+"/modular-calls").on("close",function(){
+
+        });
+      });
     });
   });
 });

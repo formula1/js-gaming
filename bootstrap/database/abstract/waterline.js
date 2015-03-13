@@ -46,7 +46,7 @@ function stdExtend(schema){
           " is not a function"
         );
       }
-      this[type][time].push(fn);
+      middleware[type][time].push(fn);
     };
   });
   MIDDLEWARE_TYPES.forEach(function(type){

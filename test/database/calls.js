@@ -44,7 +44,7 @@ function runPost(next){
         return next("NOT OK("+res.status+"): "+res.text);
       }
       console.log("POST SUCCESSFUL");
-      instance = res.header.location.split("/")[1];
+      instance = res.body.id;
       next();
     });
 }
@@ -99,7 +99,6 @@ function runSearch(next){
       if(cur.id != instance.id){
         return next("["+cur.id+" != "+instance.id+"]");
       }
-      console.log(cur);
       console.log("SEARCH SUCCESSFUL");
       next();
     });
