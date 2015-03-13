@@ -24,6 +24,6 @@ module.exports = Router.extend({
 
     catchAll: function(path) {
         console.warn('catchAll route triggered', path);
-        this.redirectTo('');
+        //this.redirectTo('');
     }
 });
