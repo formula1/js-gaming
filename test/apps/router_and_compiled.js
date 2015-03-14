@@ -22,14 +22,12 @@ server.on("upgrade",function(req,soc,body){
   });
 });
 
-database.collect(function(e,mongo){
+userserver = userserver(database.orm);
+userserver.collect(function(e,providers){
   if(e) throw e;
-  console.log("Database finished");
-  userserver = userserver(void(0),void(0),{
-
-  });
-  userserver.collect(function(e,providers){
+  database.connect(function(e,mongo){
     if(e) throw e;
+    console.log("Database finished");
     appserver.collect(function(e,applist){
       if(e) throw e;
       serverRouter
@@ -37,6 +35,11 @@ database.collect(function(e,mongo){
         .use(appserver.wsrouter);
       server.listen(3000);
       console.log("listining");
+      var child_process = require("child_process");
+      child_process.fork(__dirname+"/generatematch")
+      .on("close",function(){
+        process.close();
+      });
     });
   });
 });

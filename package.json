@@ -42,6 +42,7 @@
     "moment": "^2.8.4",
     "moonboots-express": "^0.1.1",
     "passport": "^0.2.1",
+    "passport-http": "^0.2.2",
     "passport-local": "^1.0.0",
     "passport-persona": "^0.1.7",
     "passport-strategy": "^1.0.0",

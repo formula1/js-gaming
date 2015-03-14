@@ -1,5 +1,6 @@
 var Waterline = require('waterline');
 var moment = require("moment");
+var stdSchema = require(__dirname+"/../database/abstract/waterline");
 
 
 module.exports = Waterline.Collection.extend(stdSchema({

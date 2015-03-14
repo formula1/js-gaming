@@ -1,5 +1,5 @@
 var Waterline = require('waterline');
-var stdSchema = require(__dirname+"/../database/abstract/waterline");
+var stdSchema = require(__dirname+"/../../database/abstract/waterline");
 
 var User = Waterline.Collection.extend(stdSchema({
   // Define a custom table name
@@ -17,7 +17,7 @@ var User = Waterline.Collection.extend(stdSchema({
     },
     loggedIn: {
       type: "boolean",
-      default: true
+      defaultsTo: true
     },
     provider: {
       type: "string",
@@ -42,13 +42,6 @@ var User = Waterline.Collection.extend(stdSchema({
     if(req.user.groups != "admin") return next(false);
     next(true);
   },
-  Serialize:function(user,next){
-    if(user && user.id) return next(void(0), user.id);
-    next(new Error("no user"));
-  },
-  Deserialize:function(id,next){
-    User.findOne({id:id},next);
-  }
 }));
 
 module.exports = User;

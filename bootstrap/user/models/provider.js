@@ -1,28 +1,25 @@
 var Waterline = require('waterline');
-var stdSchema = require(__dirname+"/../database/abstract/waterline");
+var stdSchema = require(__dirname+"/../../database/abstract/waterline");
 
-var User = require("./User");
-
-var UserProvider = Waterline.Collection.extend({
+var UserProvider = Waterline.Collection.extend(stdSchema({
   tableName: '_UserProvider',
   schema: true,
   connection: "database",
   attributes: {
     profile_id:{
-      type: String,
+      type: "string",
       unique: true
     },
     provider:{
-      type: String,
-  //    enum: setup.authTypes
+      type: "String",
     },
     user:{
       model: 'User',
       index:true
     },
-    token: String,
-    token_secret: String,
-    pass: String
+    token: "String",
+    token_secret: "String",
+    pass: "String"
   },
   applyToUser: function(user, token, tokenSecret, profile, next){
     var UserProvider = this;
@@ -51,10 +48,12 @@ var UserProvider = Waterline.Collection.extend({
       }).catch(next);
     }).catch(next);
   },findAndValidate: function(token, tokenSecret, profile, next){
+    console.log("attempting to find");
     this
     .findOne({profile_id:profile.provider+"-"+profile.id})
     .populate("user")
     .then(function(provider){
+      console.log(arguments);
       if(!provider) return next();
       console.log("found a provider");
       if(provider.pass){
@@ -67,7 +66,9 @@ var UserProvider = Waterline.Collection.extend({
       }).catch(next);
     }).catch(next);
   },findOrCreateUser:function(token, tokenSecret, profile, next){
+    console.log("find or create");
     var UserProvider = this;
+    var User = this.waterline.collections.user;
     UserProvider.findAndValidate(token, tokenSecret, profile, function(err,user,provider){
       if(err) return next(err,user,provider);
       if(user && provider) return next(err,user,provider);
@@ -89,20 +90,6 @@ var UserProvider = Waterline.Collection.extend({
       }).catch(next);
     });
   }
-});
-
-UserProvider.after("destroy",function(values,next){
-  UserProvider.find({user:values.user}, function(err,docs){
-    if(err) throw err;
-    if(docs.length > 0) next();
-    values.user.destroy(next);
-  });
-});
-
-User.schema.after('destroy', function(doc){
-  UserProvider.find({user:doc.user}).remove(function(err,docs){
-    if(err) throw err;
-  });
-});
+}));
 
 module.exports = UserProvider;

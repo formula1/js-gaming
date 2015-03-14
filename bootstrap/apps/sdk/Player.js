@@ -4,10 +4,11 @@ var ProxyDuplex = require("../../../abstract/message/ProxyDuplex");
 function Player(userjson,client){
   Object.defineProperty(this,"isOnline",{
     get:function(){
+      console.log(this);
       return this.fallbacks.length > 0;
     }
   });
-  this._id = userjson._id;
+  this.id = userjson.id;
   this.user = userjson;
   this.add("ntp",function(){
     return Date.now();

@@ -12,19 +12,19 @@ var userserver = require("./user");
 //var matchmaker = require("./matchmaker");
 
 
-database.collect(function(e){
+console.log("Database finished");
+userserver = userserver(database.orm);
+userserver.collect(function(e,providers){
   if(e) throw e;
-  console.log("Database finished");
-  userserver = userserver();
-  userserver.collect(function(e,providers){
+  console.log("UserServer finished");
+  appserver.collect(function(e,applist){
     if(e) throw e;
-    console.log("UserServer finished");
-    appserver.collect(function(e,applist){
-      if(e) throw e;
-      console.log("AppServer finished");
+    console.log("AppServer finished");
 
 //      matchmaker = matchmaker();
-      var test = require("./httpserver/test");
+    var test = require("./httpserver/test");
+    database.connect(function(e){
+      if(e) throw e;
 
       // -----------------
       // Enable Sessions and cookies

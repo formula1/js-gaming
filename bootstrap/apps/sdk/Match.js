@@ -40,7 +40,7 @@ Match.prototype.join = function(client){
   var l = this.players.length;
   var player = false;
   while(l--){
-    if(this.players[l]._id == client.user._id){
+    if(this.players[l].id == client.user.id){
       player = this.players[l];
       break;
     }
@@ -79,11 +79,17 @@ Match.prototype.initialize = function(){
   this._state = Match.STARTING;
   var l = this.players.length;
   while(l--){
-    if(!this.players[l].isOnline || !this.players[l].lag){
+    if(!this.players[l].isOnline){
       console.log(this.players[l].isOnline);
+      this._state = Match.UNSTARTED;
+      console.log("a player is not online init right now");
+      return;
+
+    }
+    if(!this.players[l].lag){
       console.log(this.players[l].lag);
       this._state = Match.UNSTARTED;
-      console.log("not init right now");
+      console.log("a player's npt has not been completed");
       return;
     }
   }
