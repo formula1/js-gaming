@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var React = require('react');
 
 var ChatMessages = React.createClass({
@@ -42,6 +42,7 @@ var ChatMessages = React.createClass({
           <div>
             <strong>{message.sender}:</strong> 
             <span>{message.message}</span>
+            <span class="float-right">{message.readableTimestamp()}</span>
           </div>
         );
       });

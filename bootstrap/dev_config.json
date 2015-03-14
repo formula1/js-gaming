@@ -41,10 +41,12 @@
       "connections": {
         "rest": {
           "adapter": "rest",
-          "hostname": "localhost",
-          "port": 3000,
-          "pathname": "/api", // base api path
-          "type": "json",     // expected response type
+          "type": "json", // expected response type
+          "url": {
+            "hostname": "localhost",
+            "port": 3000,
+            "pathname": "/api", // base api path
+          }
         }
       }
     },
