@@ -44,7 +44,7 @@ MatchMaker.prototype.addUser = function(user,query,res,next){
   var games = applyGameQuery(this.games, query);
   var l = games.length;
   if(!l) return next(new Error("404"));
-  var item = {user:user,query:query,games:games,res:res};
+  var item = {_id:user._id,user:user,query:query,games:games,res:res};
   if(!query.joinInProgress || !this.needing_players.length){
     return this.addToWaitingList(item,next);
   }
@@ -154,7 +154,9 @@ MatchMaker.prototype.deadGame = function(matchid, name){
 };
 
 function applyPlayerQuery (players, query) {
+  console.log(players);
   var ret = _.uniq(players,"_id");
+  console.log(ret);
   if(query && query.player){
     return _.filter(ret, {user:query.player});
   }

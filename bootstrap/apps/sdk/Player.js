@@ -7,7 +7,7 @@ function Player(userjson,client){
       return this.fallbacks.length > 0;
     }
   });
-  this._id = userjson._id;
+  this.id = userjson._id;
   this.user = userjson;
   this.add("ntp",function(){
     return Date.now();

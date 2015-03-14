@@ -13,6 +13,7 @@ function Match(players_info){
     player = new Player(player);
     players.push(player);
     player.on("error",function(e){
+      console.error(e.stack);
       _this.emit("player-error", e, player);
     });
     player.on("exit",function(e){
@@ -40,7 +41,7 @@ Match.prototype.join = function(client){
   var l = this.players.length;
   var player = false;
   while(l--){
-    if(this.players[l]._id == client.user._id){
+    if(this.players[l].id == client.user._id){
       player = this.players[l];
       break;
     }

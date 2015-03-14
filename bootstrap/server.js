@@ -49,7 +49,7 @@ database.collect(function(e){
       // listen for incoming http requests on the port as specified in our config
       httpserver
       .use("/apps",appserver.router)
-      .use("/api",database.getRouter())
+      .use("/api",database.router)
       .use("/auth",userserver.router)
 //      .use("/match",matchmaker.router)
       .use('/temp', function(req,res,next){

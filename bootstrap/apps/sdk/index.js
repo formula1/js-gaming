@@ -9,10 +9,7 @@ var MatchHandler = require(__dirname+"/MatchHandler");
 
 var parentCom = new ProcessAbstract(process);
 
-global.Match = Match;
-
-var customMatch = require(process.argv[2].toString("utf8"));
-var app = new MatchHandler(customMatch);
+var app = new MatchHandler();
 parentCom.handle.ws("/apps/:game/:matchid",function(req,sock,next){
   if(!req.user) return next("no user");
   var User = new Client(req,sock);

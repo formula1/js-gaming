@@ -27,8 +27,11 @@
       }
     },
     "mongodb": {
-      "host":"localhost",
+      "hostname":"localhost",
       "port":27017,
       "database":"jsgaming",
+      "options":{
+        "safe":true
+      }
     }
 }

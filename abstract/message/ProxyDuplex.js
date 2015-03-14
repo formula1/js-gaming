@@ -21,13 +21,14 @@ ProxyDuplex.prototype.constructor = ProxyDuplex;
 ProxyDuplex.prototype.open = function(Duplex){
   this.fallbacks.push(Duplex);
   Duplex.on("close",this.close.bind(this,Duplex));
+  Duplex.on("error",this.emit.bind(this,"error"));
   Duplex._oldhandleMessage = Duplex.handleMessage;
   Duplex.handleMessage = this.handleMessage.bind(this);
   if(!this._ready) this.ready();
 };
 
 ProxyDuplex.prototype.close = function(Duplex){
-  var l = this.fallbacks.length;
+  l = this.fallbacks.length;
   while(l--){
     if(this.fallbacks[l] == Duplex){
       this.fallbacks.splice(l,1);

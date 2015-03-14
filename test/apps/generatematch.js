@@ -35,6 +35,10 @@ var c2s = require("../../abstract/clientserver/client2server");
       console.log("ntp in the client");
       return Date.now();
     });
+    TheMatch.add("me",function(me){
+      console.log("me in the client",me);
+      return true;
+    });
   });
 });
 

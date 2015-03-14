@@ -1,11 +1,6 @@
-var Match = require("./Match");
+var Match = require("./VmMatch");
 
-function MatchHandler(matchtype,timeout){
-  if(!matchtype) throw new Error("Need to provide a match to create");
-  if(!(matchtype.prototype instanceof Match)){
-    throw new Error("MatchType needs to be an instance of Match");
-  }
-  this.match = matchtype;
+function MatchHandler(timeout){
   this.timeout = timeout||Number.POSITIVE_INFINITY;
   this.matches = {};
   this.queuedPlayers = [];
@@ -13,7 +8,7 @@ function MatchHandler(matchtype,timeout){
 
 MatchHandler.prototype.createMatch = function(matchid,players){
   console.log("inside createMatch");
-  this.matches[matchid] = new this.match(players);
+  this.matches[matchid] = new Match(players);
   this.matches[matchid].id = matchid;
   var t = Date.now();
   var l = this.queuedPlayers.length;

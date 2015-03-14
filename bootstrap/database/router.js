@@ -1,23 +1,17 @@
+var mongoose = require("mongoose");
+var url = require("url");
 var _ = require("lodash");
-module.exports = function() {
-
-// router will be called as a prototype method of database
-var database = this;
 
 var isHidden = /^_.*/;
+
+
 
 var router = require("express").Router();
 
 router.param('classname', function(req, res, next, classname){
   if(isHidden.test(classname)) return res.status(404).end();
-  try {
-    req.mClass = database.collections[classname];
-    console.log('set req.mClass to', require('util').inspect(req.mClass));
-  }
-  catch(e) {
-    console.error('Error while requiring', classname, e);
-    return res.status(404).end();
-  }
+  if(mongoose.modelNames().indexOf(classname) === -1) return res.status(404).end();
+  req.mClass = mongoose.model(classname);
   next();
 });
 
@@ -55,9 +49,7 @@ router.get("/:classname",function(req,res){
   }
   var search = req.mClass.defaultSearch||{};
   _.merge(search,req.query||{});
-  console.log('calling find with', search, ipp, sort);
   req.mClass.find(search).limit(ipp).sort(sort).exec(function(err,docs){
-    console.log('find returns', err, docs);
     if(err) return next(err);
     var l = docs.length;
     res.send(docs);
@@ -110,5 +102,4 @@ router.post("/:classname/:id/:method",function(req,res){
   });
 });
 
-return router;
-};
+module.exports = router;

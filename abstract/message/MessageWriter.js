@@ -41,6 +41,7 @@ MessageWriter.prototype.ready = function(){
 
 MessageWriter.prototype.stop = function(){
 	this._ready = false;
+  this.emit("stop", this);
 };
 
 

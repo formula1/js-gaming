@@ -21,6 +21,7 @@ module.exports.middleware = function(config){
     passport.initialize(),
     passport.session(),
     function(req,res,next){
+      console.log("user");
       if(req.user) return next();
       var auth = req.headers.authorization;
       if(!auth) return next();
@@ -35,7 +36,9 @@ module.exports.middleware = function(config){
         displayName:auth[0],
         password:auth[1]
       };
+      console.log("about to validate");
       UserProvider.findAndValidate(void(0),void(0),profile,function(err,user){
+        console.log("return from validation");
         if(err) return next();
         if(!user) return next();
         req.user = user;
