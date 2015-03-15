@@ -1,8 +1,8 @@
 var _ = require("lodash");
 var waitingPlayers = [];
 var READY = "ready";
-var MOVE = "move";
 var COUNTDOWN = "countdown";
+var MOVE = "move";
 
 var state = void(0);
 var timeout = void(0);
@@ -48,16 +48,16 @@ function playerReady(player){
   }
   console.log("all players ready");
   clearTimeout(timeout);
-  state = COUNTDOWN;
   start();
 }
 
 function start(){
+  state = COUNTDOWN;
   match.lagCast(COUNTDOWN,function(){
     setTimeout(function(){
-      state = MOVE;
       console.log("state attempting to be action");
       match.lagCast(MOVE,function(){
+        state = MOVE;
         timeout = setTimeout(finish,30000);
       });
     },5000);
@@ -66,7 +66,7 @@ function start(){
 
 function move(player,data){
   if(state != MOVE) return;
-  if(0 < data < 3 ) playerInfo[player.id].move = data;
+  if(0 < data < 4 ) playerInfo[player.id].move = data;
 }
 
 function finish(){
