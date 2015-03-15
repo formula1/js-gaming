@@ -50,6 +50,8 @@
     "path-to-regexp": "^1.0.3",
     "qs": "^2.3.3",
     "radix64": "^1.1.0",
+    "react": "^0.13.0",
+    "reactify": "^1.1.0",
     "request": "^2.53.0",
     "sails-mongo": "^0.10.5",
     "semi-static": "^0.0.5",

@@ -8,8 +8,7 @@ var ee = require("events").EventEmitter;
 function ModelCompiler(config) {
   if(!(this instanceof ModelCompiler)) return new ModelCompiler(config);
   config = config ? config : require("getconfig");
-  this.mconfig = config.mongodb;
-  this.mconfig.adapter = 'mongo';
+  this.config = config.database;
   this.orm = new Waterline();
   ee.call(this.orm);
   for(var i in ee.prototype){
@@ -37,14 +36,10 @@ ModelCompiler.prototype.addCollection = function(schema){
 ModelCompiler.prototype.connect = function(next){
   var cbret = cbpr(this, next);
   var self = this;
-  self.orm.initialize({
-    adapters: {
-      mongo: MongoAdapter
-    },
-    connections: {
-      database: self.mconfig
-    }
-  }, function(err, models) {
+  var config = {adapters:{},connections:{}};
+  config.adapters[self.config.adapter_name] = MongoAdapter;
+  config.connections = self.config.connections;
+  self.orm.initialize(config, function(err, models) {
     if(err) return cbret.cb(err);
     self.orm.emit("initialize", self.orm);
     self.collections = models.collections;

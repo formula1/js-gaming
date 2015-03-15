@@ -11,20 +11,19 @@ module.exports = Router.extend({
     },
 
     // ------- ROUTE HANDLERS ---------
-    chat: function () {
+    chat: function() {
         this.trigger('page', new ChatPage({
-            model: me,
             collection: app.messages
         }));
     },
 
-    info: function () {
+    info: function() {
         this.trigger('page', new InfoPage({
-            model: me
         }));
     },
 
-    catchAll: function () {
-        this.redirectTo('');
+    catchAll: function(path) {
+        console.warn('catchAll route triggered', path);
+        //this.redirectTo('');
     }
 });

@@ -1,41 +1,34 @@
 /*global app, me, $*/
 var _ = require('lodash');
+var async = require('async');
 var logger = require('andlog');
 var config = require('clientconfig');
 
 var Router = require('./router');
 var tracking = require('./helpers/metrics');
 var MainView = require('./views/main');
-var Me = require('./models/me');
-var Messages = require('./models/messages');
+var models = require('./models')(config);
 var domReady = require('domready');
-
 
 module.exports = {
     // this is the the whole app initter
     blastoff: function () {
         var self = window.app = this;
 
-        // create our global 'me' object and an empty collection for our message models.
-        window.me = new Me({
-            username: 'airandfingers'
-        });
-        this.messages = new Messages();
-
         // init our URL handlers and the history tracker
         this.router = new Router();
 
         // wait for document ready to render our main view
         // this ensures the document has a body, etc.
-        domReady(function () {
-            // init our main view
-            var mainView = self.view = new MainView({
-                model: me,
-                el: document.body
-            });
-
-            // ...and render it
-            mainView.render();
+        // also, wait for models to load
+        async.parallel([
+            models.collect.bind(models),
+            domReady
+        ],
+        function(err) {
+            if (err) throw err;
+            // render our main view
+            self.view = MainView.render(document.getElementById('container'), models);
 
             // we have what we need, we can now start our router and show the appropriate page
             self.router.history.start({pushState: true, root: '/'});

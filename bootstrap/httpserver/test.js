@@ -34,14 +34,7 @@ module.exports.routes = function(app){
     }));
   }
 
-  // -----------------
-  // Set our client config cookie
-  // -----------------
-  app.use(function (req, res, next) {
-    res.cookie('config', JSON.stringify(config.client));
-    next();
-  });
-
+/*
   // ---------------------------------------------------
   // Configure Moonboots to serve our client application
   // ---------------------------------------------------
@@ -58,7 +51,8 @@ module.exports.routes = function(app){
       fixPath('public/css/app.css')
       ],
       browserify: {
-        debug: false
+        debug: true,
+        transform: ['reactify']
       },
       beforeBuildJS: function () {
         // This re-builds our template files from jade each time the app's main
@@ -84,5 +78,5 @@ module.exports.routes = function(app){
       }
     },
     server: app
-  });
+  });*/
 };

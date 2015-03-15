@@ -2,7 +2,6 @@ var Waterline = require('waterline');
 
 module.exports = {
   identity: 'message',
-  tableName: 'messages',
   attributes: {
     sender: {
       type: 'string',
@@ -13,7 +12,7 @@ module.exports = {
       required: true
     },
     timestamp: {
-      type: 'string',
+      type: 'date',
       required: true
     },
   }
