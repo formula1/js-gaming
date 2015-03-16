@@ -1,10 +1,13 @@
-function Client2Client_com(nethost, target){
+var callprom = require("../utility/cbpromise");
+
+function NeworkInstance(nethost, user){
+  this.self = user;
+  this.nethost = nethost;
   MessageDuplex.call(this, function(message){
-		message.identity = this.target;
+		message.originator = this.self;
+    message.reciever = this.target;
     this.channel.send(JSON.stringify(message));
 	}.bind(this));
-	this.target = target;
-  this.nethost = nethost;
   this.pconn = new RTCPeerConnection(nethost.config,{
     optional: [
         {DtlsSrtpKeyAgreement: true},
@@ -22,20 +25,28 @@ function Client2Client_com(nethost, target){
 NetworkInstance.prototype = Object.create(MessageDuplex.prototype);
 NetworkInstance.prototype.constructor = NetworkInstance;
 
-NetworkInstance.prototype.offer = function(identity,cb){
-	this.target = identity;
-  this.registerChannel(this.pconn.createDataChannel("sendDataChannel",this.nethost.sconfig));
+NetworkInstance.prototype.offerTo = function(user,cb){
+	this.target = user;
   var that = this;
+  this.offer(function(err,desc){
+    if(err) return cb(err);
+    that.nethost.get("offer",{
+      reciever:that.target,
+      originator:that.self,
+      desc:that.pconn.localDescription
+    });
+  });
+};
+
+NetworkInstance.prototype.offer = function(cb){
+  var cr = callprom(this,cb);
+  var that = this;
+  this.registerChannel(this.pconn.createDataChannel("sendDataChannel",this.nethost.sconfig));
   this.pconn.createOffer(function(desc){
     that.pconn.setLocalDescription(desc, function () {
-      that.nethost.RTCHandle.send({
-        cmd:"offer",
-        identity:identity,
-        desc:that.pconn.localDescription
-      });
-      cb(void(0),that);
-    }, cb);
-  }, cb);
+      cr.cb(void(0),{id:this.id,offer:desc});
+    }, cr.cb);
+  }, cr.cb);
 };
 
 NetworkInstance.prototype.registerChannel = function(channel){
@@ -53,8 +64,9 @@ NetworkInstance.prototype.registerChannel = function(channel){
 	};
 	this.channel.onopen = function(){
     that.ready();
+    this.emit("open",this);
   };
-  this.channel.onclose = this.emit.bind(this,"close");
+  this.channel.onclose = this.stop.bind(this);
 };
 /**
   Accepts a webrtc offer from another party
