@@ -1,0 +1,32 @@
+$ = Server
+@ = Client
+
+$-BEST_HOST = {host:null, avg_ntp:Math.POSITIVE_INFINITY}
+$-Foreach User as POSSIBLE_HOST
+	$-Request RTC connection messages from POSSIBLE_HOST = Number of players - 1
+		@-POSSIBLE_HOST creates that number of RTC offers
+		@-POSSIBLE_HOST sends the RTC offers to the server
+	$-For every user besides POSSIBLE_HOST as TESTER
+		$-Request an RTC accept from TESTER by sending TESTER a unique RTC offer
+			@-TESTER sends back an RTC accept
+				$-Server sends accept to POSSIBLE_HOST
+					@-POSSIBLE_HOST Initiates Connection
+					@-POSSIBLE_HOST tells server when connection is ready
+	$-After All connections are ready
+		$-Server Sends Test command to Every User
+			@-User runs NTP
+				@-User sends ntp data to server
+	$-Server calculates the net_ntp=ntp.map(^2).sum(ntp^2)/ntp.length
+	$-BEST_HOST = BEST_HOST.avg_ntp < net_ntp?BEST_HOST:{host:POSSIBLE_HOST, avg_ntp:net_ntp}
+	$-Server orders all users to disconnect
+		@-Users disconnect
+$-Request RTC connection messages from BEST_HOST.host = Number of players - 1
+	@-BEST_HOST.host creates that number of RTC offers
+	@-BEST_HOST.host sends the RTC offers to the server
+$-For every user besides BEST_HOST.host as TESTER
+	$-Request an RTC accept from TESTER by sending TESTER a unique RTC offer
+		@-TESTER sends back an RTC accept
+$-Server Tells All players BEST_HOST is the host
+	@-BEST_HOST initiates the match
+		@-BEST_HOST signals to themself by timeouts and
+	@-players besides BEST_HOST wait for the signal to start

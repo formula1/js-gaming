@@ -58,8 +58,9 @@
     "stylizer": "^1.0.0",
     "templatizer": "^1.0.0",
     "underscore": "^1.6.0",
-    "websocket-driver": "^0.5.3",
-    "waterline": "^0.10.18"
+    "vm-shim": "0.0.6",
+    "waterline": "^0.10.18",
+    "websocket-driver": "^0.5.3"
   },
   "devDependencies": {
     "websocket": "^1.0.17"

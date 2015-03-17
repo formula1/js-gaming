@@ -58,7 +58,7 @@ MatchConnection.prototype.ntp = function(next){
       return next(new Error("the offset difference is too large"));
     }
     this.offset = this.offset?(this.offset+offset)/2:offset;
-    next();
+    next(void(0),{id:this.id,lag:this.lag,offset:this.offset});
   }.bind(this));
 };
 

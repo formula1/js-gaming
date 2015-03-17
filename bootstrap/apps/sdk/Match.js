@@ -105,7 +105,7 @@ Match.prototype.syncGet = function(event,data,next){
     next = data;
     data = void(0);
   }
-  async.each(this.players[l],
+  async.each(this.players,
     function(item,next){
       item.get(event,data,next);
     },next
@@ -133,9 +133,18 @@ Match.prototype.lagGet = function(event,data,next){
     data = void(0);
   }
   var lag = this.lag;
-  async.each(this.players[l],
+  async.each(this.players,
     function(item,next){
       setTimeout(item.get.bind(item,event,data,next), lag - item.lag);
+    },next
+  );
+};
+
+Match.prototype.ntp = function(next){
+  var lag = this.lag;
+  async.each(this.players,
+    function(item,next){
+      item.ntp(next);
     },next
   );
 };

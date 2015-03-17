@@ -1,7 +1,8 @@
 var callprom = require("../utility/cbpromise");
 
 function NeworkInstance(nethost, user){
-  this.self = user;
+  this.self = nethost.me;
+  this.target = user;
   this.nethost = nethost;
   MessageDuplex.call(this, function(message){
 		message.originator = this.self;
@@ -15,28 +16,9 @@ function NeworkInstance(nethost, user){
     ]
 	});
   this.pconn.onicecandidate = this.iceCB.bind(this);
-  Object.defineProperty(this, "state", {
-    get: function(){
-      if(!this.pconn.localDescription)
-        return "dormant";
-    }
-  });
 }
 NetworkInstance.prototype = Object.create(MessageDuplex.prototype);
 NetworkInstance.prototype.constructor = NetworkInstance;
-
-NetworkInstance.prototype.offerTo = function(user,cb){
-	this.target = user;
-  var that = this;
-  this.offer(function(err,desc){
-    if(err) return cb(err);
-    that.nethost.get("offer",{
-      reciever:that.target,
-      originator:that.self,
-      desc:that.pconn.localDescription
-    });
-  });
-};
 
 NetworkInstance.prototype.offer = function(cb){
   var cr = callprom(this,cb);
@@ -44,7 +26,7 @@ NetworkInstance.prototype.offer = function(cb){
   this.registerChannel(this.pconn.createDataChannel("sendDataChannel",this.nethost.sconfig));
   this.pconn.createOffer(function(desc){
     that.pconn.setLocalDescription(desc, function () {
-      cr.cb(void(0),{id:this.id,offer:desc});
+      cr.cb(void(0),{target:that.target,sender:that.self,offer:desc});
     }, cr.cb);
   }, cr.cb);
 };

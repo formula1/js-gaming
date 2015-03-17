@@ -1,0 +1,19 @@
+Statistics
+
+-Payers
+	-People that generally pay for the services they use
+	-Additionally we want to reward these people as much as possible
+-Bot Level
+	-People others consider bots but the people on the other side don't claim to be
+	-A player can also host a bot script.
+		-We will pay them if the bot's win and the match is hosted on our server by the other player
+		-We will also give them all of the move data to make their bot better
+-Cheat level
+  -When the player is the host, they are in control
+  -If a hosts data doesn't match the players' data
+    -We will consider that a cheat
+  -At a certian point in time, that user will be prevented from hosting
+-Harrassment level
+  -Any user can be considered a harasser
+  -When the exposure to people <-> flagged for harassment hits a threshhold
+    -That person is considered a problem

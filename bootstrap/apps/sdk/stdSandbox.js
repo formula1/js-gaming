@@ -13,7 +13,7 @@ var GLOBALS = [
 
 var OK = [
   "super-agent", "waterline", "sails-memory", "sails-http",
-  "lodash", "mersennetwister", "async", "bluebird"
+  "lodash", "mersennetwister", "async", "bluebird", "jquery"
 ];
 
 module.exports = function(dir){

@@ -1,7 +1,7 @@
 
 var _ = require("lodash");
 var random = require(__root+"/abstract/random-gen");
-
+var factory = require("./matchfactory");
 /*
 
 Player Enters
@@ -44,7 +44,14 @@ MatchMaker.prototype.addUser = function(user,query,res,next){
   var games = applyGameQuery(this.games, query);
   var l = games.length;
   if(!l) return next(new Error("404"));
-  var item = {_id:user._id,user:user,query:query,games:games,res:res};
+  var item = {
+    _id:user._id,
+    user:user.user,
+    client:user,
+    query:query,
+    games:games,
+    res:res
+  };
   if(!query.joinInProgress || !this.needing_players.length){
     return this.addToWaitingList(item,next);
   }
@@ -113,15 +120,10 @@ MatchMaker.prototype.checkForMatchAsync = function(){
 };
 
 MatchMaker.prototype.createMatch = function(players, game){
-  var i, l;
-  var match_id = random();
-  console.log("creating match");
   for(i=0, l = players.length;i<l;i++){
-    players[i].res(void(0),{game:game.name, match:match_id});
     this.removeUser(players[i]);
-    players[i] = players[i].user;
   }
-  return game.fork.trigger("match",{match_id:match_id, players:players});
+  factory(players,game,this.games);
 };
 
 MatchMaker.prototype.needPlayer = function(matchInfo, game){

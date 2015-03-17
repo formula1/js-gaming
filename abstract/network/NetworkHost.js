@@ -34,10 +34,11 @@ ClientHost.prototype.closeAll = function(){
     this.connections[i].close();
 };
 
-ClientHost.prototype.offer = function(cb){
+ClientHost.prototype.offer = function(user,cb){
   var cr = callprom(this,cb);
-  var id = Date.now()+"_"+Math.random();
-	this.connections[id] = new NetworkInstance(this,this.me);
+  var id = user.id;
+	this.connections[id] = new NetworkInstance(this,user);
+  this.connections[id].on("open",this.emit.bind(this,"connection"));
   this.connections[id].id = id;
 	this.connections[id].offer(cr.cb);
   return cr.ret;
@@ -45,8 +46,9 @@ ClientHost.prototype.offer = function(cb){
 
 ClientHost.prototype.accept = function(message){
   var cr = callprom(this,cb);
-	var identity = message.identity;
-	this.connections[identity] = new NetworkInstance(this);
+	var id = message.user.id;
+	this.connections[id] = new NetworkInstance(this,message.user);
+  this.connections[id].on("open",this.emit.bind(this,"connection"));
 	this.connections[identity].accept(message,cr.cb);
   return cr.ret;
 };
