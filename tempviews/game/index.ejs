@@ -22,31 +22,14 @@
         }
       %>
     </section>
-    <script type="text/javascript">
-      var Server = require("Server");
-      var url = require("url");
-      var querystring = require("qs");
-      jQuery(function($){
-        var $matches = $("#match_container");
-        var $form = $matches.find("form");
-        var MatchMaker = new Server("<%-routePaths.apps%>");
-        $form.on("submit",function(e){
-          e.preventDefault();
-          if(!MatchMaker.ready) return;
-          MatchMaker.get("find", querystring.parse($form.serialize()), function(e,value){
-            if(e) throw e;
-            var frame = $("<div><iframe "+
-              "src=\"<%-routePaths.apps%>/"+value.game+"/"+value.match+"\""+
-              " ></iframe></div>"
-            );
-            $matches.append(frame);
-          });
-        });
-        var uri = url.parse(document.location.href);
-        if(!uri.search) return;
-        $form.unserialize(uri.search.substring(/^\?/.test(uri)?1:0));
-        $form.submit();
-      });
+    <script type="text/javascript" src="apps/matchmaker.js" ></script>
+    <script type="text/html" id="gametypehtml">
+      <form>
+        <label><input type="radio" name="type" value="rtc" /> RTC</label>
+        <label><input type="radio" name="type" value="ws" /> Server</label>
+        <label><input type="number" name="amount" value=0 />Vote weight</label>
+        <button type="submit" >Submit</button>
+      </form>
     </script>
     <%-include("../footer.ejs") %>
   </body>

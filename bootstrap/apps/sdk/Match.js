@@ -30,6 +30,18 @@ function Match(players_info){
   this.lag = 0;
   this.data = {};
   this._state = Match.UNSTARTED;
+  this._playerInitializers = [
+    function(player,next){
+      player.ntp(function(err){
+        if(err) return next(err);
+        console.log("after ntp");
+        _this.lag = Math.max(player.lag,_this.lag);
+      });
+    },
+    function(player,next){
+      player.me(next);
+    }
+  ];
   console.log("finished constructing match");
 }
 
@@ -52,23 +64,15 @@ Match.prototype.join = function(client){
   }
   player.open(client);
   _this = this;
-  player.ntp(function(err){
+  async.applyEach(this._playerInitializers,player,function(err){
     if(err){
       console.log(err);
       player.trigger("reopen");
       player.close(client);
       return;
     }
-    console.log("after ntp");
-    _this.lag = Math.max(player.lag,_this.lag);
-    player.me(function(err){
-      if(err){
-        console.log(err);
-        player.close(client);
-      }
-      _this.emit("player-join",player);
-      _this.initialize();
-    });
+    _this.emit("player-join",player);
+    _this.initialize();
   });
 };
 

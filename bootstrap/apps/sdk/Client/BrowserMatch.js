@@ -1,6 +1,5 @@
 var vm = require('vm-shim');
-var stdSandbox = require("./stdSandbox");
-var Match = require("./Match");
+var Match = require("../Match");
 
 
 function BrowserMatch(players,script){
@@ -10,7 +9,15 @@ function BrowserMatch(players,script){
   this.vm = vm.runInNewContext(script,sandbox);
 }
 
-VmMatch.prototype = Object.create(Match.prototype);
-VmMatch.prototype.constructor = VmMatch;
+BrowserMatch.prototype = Object.create(Match.prototype);
+BrowserMatch.prototype.constructor = BrowserMatch;
 
-module.exports = VmMatch;
+BrowserMatch.createMatchFromUri = function(uri,users,next){
+  superAgent.get(uri).end(function(err,res){
+    if(err) return next(err);
+    next(void(0),new BrowserMatch(users,res.text));
+  });
+};
+
+
+module.exports = BrowserMatch;

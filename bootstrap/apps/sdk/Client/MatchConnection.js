@@ -1,5 +1,5 @@
 
-var ProxyDuplex = require("../../../abstract/message/ProxyDuplex");
+var ProxyDuplex = require(__dirname+"/../../../abstract/message/ProxyDuplex");
 
 function MatchConnection(match_id, connection){
   this.me = void(0);

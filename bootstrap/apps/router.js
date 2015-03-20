@@ -1,5 +1,8 @@
 
 var express = require("express");
+var browserify = require("browserify");
+var b = browserify();
+b.add(__dirname+"/matchmaker/browser");
 
 module.exports = function(ob){
   var router = express.Router();
@@ -20,8 +23,17 @@ module.exports = function(ob){
     res.locals.playerMatches = [];
     res.render("game/index");
   });
+  router.get("/matchmaker.js", function(req,res,next){
+    res.status(200).setHeader('content-type', 'application/javascript');
+    b.bundle().pipe(res);
+  });
   router.get("/:appname/public/*", function(req,res,next){
     req.theApp.public(req,res,next);
+  });
+  router.get("/:appname/match.js", function(req,res,next){
+    console.log("match");
+    res.status(200).setHeader('content-type', 'application/javascript');
+    res.send(req.theApp.match_browser);
   });
   router.get("/:appname/client.js", function(req,res,next){
     console.log("client");
