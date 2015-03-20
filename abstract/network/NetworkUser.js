@@ -1,12 +1,11 @@
 var callprom = require("../utility/cbpromise");
+var MessageDuplex = require("../message/MessageDuplex.js");
 
-function NeworkInstance(nethost, user){
+function NetworkInstance(nethost, user){
   this.self = nethost.me;
-  this.target = user;
+  this.user = user;
   this.nethost = nethost;
   MessageDuplex.call(this, function(message){
-		message.originator = this.self;
-    message.reciever = this.target;
     this.channel.send(JSON.stringify(message));
 	}.bind(this));
   this.pconn = new RTCPeerConnection(nethost.config,{
@@ -20,13 +19,20 @@ function NeworkInstance(nethost, user){
 NetworkInstance.prototype = Object.create(MessageDuplex.prototype);
 NetworkInstance.prototype.constructor = NetworkInstance;
 
+NetworkInstance.prototype.close = function(){
+  this.stop();
+  this.channel.close();
+  this.pconn.close();
+};
+
 NetworkInstance.prototype.offer = function(cb){
   var cr = callprom(this,cb);
   var that = this;
   this.registerChannel(this.pconn.createDataChannel("sendDataChannel",this.nethost.sconfig));
   this.pconn.createOffer(function(desc){
     that.pconn.setLocalDescription(desc, function () {
-      cr.cb(void(0),{target:that.target,sender:that.self,offer:desc});
+      console.log("desc offered");
+      cr.cb(void(0),{target:that.user,sender:that.self,offer:desc});
     }, cr.cb);
   }, cr.cb);
 };
@@ -46,7 +52,7 @@ NetworkInstance.prototype.registerChannel = function(channel){
 	};
 	this.channel.onopen = function(){
     that.ready();
-    this.emit("open",this);
+    that.emit("open",that);
   };
   this.channel.onclose = this.stop.bind(this);
 };
@@ -57,22 +63,24 @@ NetworkInstance.prototype.registerChannel = function(channel){
   @param {netCallback} cb
 */
 NetworkInstance.prototype.accept = function(message,cb){
+  var cr = callprom(this,cb);
   var that = this;
   this.pconn.ondatachannel = function (event) {
       that.registerChannel(event.channel);
   };
-  this.pconn.setRemoteDescription(new RTCSessionDescription(message.desc),function(){
+  this.pconn.setRemoteDescription(new RTCSessionDescription(message.offer),function(){
     that.pconn.createAnswer(function(desc){
       that.pconn.setLocalDescription(desc, function () {
-        that.nethost.RTCHandle.send({
-          cmd:"accept",
-          identity:message.identity,
-          desc:that.pconn.localDescription
+        console.log("desc accepted");
+        cr.cb(void(0),{
+          target:that.user,
+          sender:that.self,
+          accept:that.pconn.localDescription
         });
-        cb(void(0),that);
-      }, cb);
-    }, cb);
-  },cb);
+      }, cr.cb);
+    }, cr.cb);
+  },cr.cb);
+  return cr.ret;
 };
 
 /**
@@ -81,27 +89,23 @@ NetworkInstance.prototype.accept = function(message,cb){
   @param {object} message - the original message from the other party
 */
 NetworkInstance.prototype.ok = function(message){
-  this.pconn.setRemoteDescription(new RTCSessionDescription(message.desc));
+  console.log("desc okayed");
+  this.pconn.setRemoteDescription(new RTCSessionDescription(message.accept));
+  return this;
 };
 
-NetworkInstance.prototype.remoteIce = function(message){
-  this.pconn.addIceCandidate(new RTCIceCandidate({
-      sdpMLineIndex: message.label,
-      candidate: message.candidate
-  }));
+NetworkInstance.prototype.remoteIce = function(candidate){
+  this.pconn.addIceCandidate(candidate);
 };
 
 NetworkInstance.prototype.iceCB = function(event){
   if (!event.candidate)
     return;
-  this.nethost.RTCHandle.send({
-    cmd:"ice",
-    identity:this.target,
-		data:{
-	    type: 'candidate',
-	    label: event.candidate.sdpMLineIndex,
-	    id: event.candidate.sdpMid,
-	    candidate: event.candidate.candidate
-		}
+  this.nethost.trigger("ice",{
+    target:this.user,
+    sender:this.self,
+		ice:event.candidate
 	});
 };
+
+module.exports = NetworkInstance;

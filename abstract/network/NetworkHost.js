@@ -6,6 +6,7 @@ function ClientHost(uri,socket,config,sconfig){
   Server.call(this,uri,socket);
   this.connections = {};
   this.config = config||{'iceServers': [
+    {url:'stun:stun.l.google.com:19302'},
     {url: "stun:"+uri.hostname+":3478"},
   ]};
   this._list = [];
@@ -15,12 +16,12 @@ function ClientHost(uri,socket,config,sconfig){
   this
   .add("offer",this.emit.bind(this,"offer"))
   .add("accept",function(data){
-    if(!that.connections[data.identity])
+    if(!that.connections[data.target._id])
       return console.log("accepting a gift ungiven");
-    that.connections[data.identity].ok(data);
-    that.emit("handshake",that.connections[data.identity]);
-  }).on("ice",function(data){
-    that.connections[data.identity].remoteIce(data.data);
+    that.connections[data.target._id].ok(data);
+    that.emit("handshake",that.connections[data.target._id]);
+  }).add("ice",function(data){
+    that.connections[data.sender._id].remoteIce(data.ice);
   }).get("me",function(me){
     that.user = me;
   });
@@ -36,7 +37,7 @@ ClientHost.prototype.closeAll = function(){
 
 ClientHost.prototype.offer = function(user,cb){
   var cr = callprom(this,cb);
-  var id = user.id;
+  var id = user._id;
 	this.connections[id] = new NetworkInstance(this,user);
   this.connections[id].on("open",this.emit.bind(this,"connection"));
   this.connections[id].id = id;
@@ -44,13 +45,18 @@ ClientHost.prototype.offer = function(user,cb){
   return cr.ret;
 };
 
-ClientHost.prototype.accept = function(message){
+ClientHost.prototype.accept = function(message,cb){
   var cr = callprom(this,cb);
-	var id = message.user.id;
-	this.connections[id] = new NetworkInstance(this,message.user);
+	var id = message.sender._id;
+	this.connections[id] = new NetworkInstance(this,message.sender);
+  this.connections[id].id = id;
   this.connections[id].on("open",this.emit.bind(this,"connection"));
-	this.connections[identity].accept(message,cr.cb);
+	this.connections[id].accept(message,cr.cb);
   return cr.ret;
+};
+
+ClientHost.prototype.ok = function(message){
+  return this.connections[message.sender._id].ok(message);
 };
 
 module.exports = ClientHost;

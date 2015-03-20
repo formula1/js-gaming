@@ -1,4 +1,6 @@
 var async = require("async");
+var random = require(__root+"/abstract/random-gen");
+
 
 
 module.exports = function(players,game,allgames){

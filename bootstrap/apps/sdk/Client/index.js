@@ -2,7 +2,6 @@ var MatchConnection = require("./MatchConnection");
 var NetworkHost = require(__dirname+"/../../../abstract/network/NetworkHost");
 var MatchInitiator = new NetworkHost();
 var RTCInit = require("./RTCInit");
-var Match = require("./BrowserMatch");
 
 var ret = new MatchConnection();
 

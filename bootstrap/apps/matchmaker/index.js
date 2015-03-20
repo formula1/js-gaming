@@ -1,6 +1,5 @@
 
 var _ = require("lodash");
-var random = require(__root+"/abstract/random-gen");
 var factory = require("./matchfactory");
 /*
 
@@ -45,7 +44,7 @@ MatchMaker.prototype.addUser = function(user,query,res,next){
   var l = games.length;
   if(!l) return next(new Error("404"));
   var item = {
-    _id:user._id,
+    _id:user.user._id,
     user:user.user,
     client:user,
     query:query,
@@ -156,12 +155,13 @@ MatchMaker.prototype.deadGame = function(matchid, name){
 };
 
 function applyPlayerQuery (players, query) {
-  console.log(players);
+  console.log("Before query length: "+players.length);
   var ret = _.uniq(players,"_id");
-  console.log(ret);
+  console.log("After unique length: "+ret.length);
   if(query && query.player){
     return _.filter(ret, {user:query.player});
   }
+  console.log("After filter length: "+ret.length);
   return ret;
 }
 

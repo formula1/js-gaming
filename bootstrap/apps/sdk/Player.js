@@ -39,8 +39,6 @@ Player.prototype.ntp = function(next){
     if(e){
       return next(e);
     }
-    console.log("In the server");
-    console.log("inside npt");
     var now = Date.now();
     var lag = (now - old)/2;
     var offset = (time-old + now-time)/2;

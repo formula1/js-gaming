@@ -40,9 +40,7 @@ ProcessAbstract.prototype.open = function(context){
         });
     }
   });
-  this.context.on("error", function(e){
-    console.log(e.stack);
-  });
+  this.context.on("error", this.emit.bind(this,"error"));
   this.ready();
 };
 

@@ -1,10 +1,10 @@
 var UNSTARTED = 0, INITIALIZING = 1;
-var MatchConnection = require("./MatchConnection");
+var MC = require("./MatchConnection");
 var async = require("async");
 var Match = require("../Match");
 
 module.exports = function(RTCHost,next){
-  var MatchConnection = new MatchConnection();
+  var MatchConnection = new MC();
   var HostedMatch = void(0);
   var ishost = false;
   var ready = false;
@@ -34,9 +34,15 @@ module.exports = function(RTCHost,next){
   }).add("me",function(data){
     me = data;
     return true;
-  }).add("request-ready",function(next){
-    if(ready) return next();
-    if(!ready) ready = next;
+  }).add("request-ready",function(nil,next){
+    console.log("ready requested");
+    if(ready){
+      console.log("ready is already set");
+      return next();
+    }
+    console.log("waiting for ready");
+    console.log(arguments);
+    ready = next;
   }).add("request-offers",function(users,next){
     if(HostUser){
       if(HostUser.id != me.id) return next("I'm not the host");
@@ -50,12 +56,15 @@ module.exports = function(RTCHost,next){
       ready = false;
       HostedMatch = new Match(users);
       HostedMatch.on("start",function(){
+        console.log("browser match start");
+        console.log(typeof ready);
         if(!ready) ready = true;
         else ready();
       });
     }
-    async.each(users,function(user,next){
+    async.map(users,function(user,next){
       //@-POSSIBLE_HOST creates that number of RTC offers
+      console.log("offering to ",user);
       RTCHost.offer(user,next);
       //@-POSSIBLE_HOST sends the RTC offers to the server
     },next);
@@ -68,17 +77,18 @@ module.exports = function(RTCHost,next){
     //@-POSSIBLE_HOST Initiates Connection
     //@-POSSIBLE_HOST tells server when connection is ready
     RTCHost.ok(accept,next);
-  }).add("request-ntp",function(next){
+    return true;
+  }).add("request-ntp",function(nil,next){
     //@-User runs NTP
     //@-User sends ntp data to server
     var times = 10;
-    async.times(times,function(next){
+    async.times(times,function(nil,next){
       if(HostedMatch){ return HostedMatch.ntp(next);}
       MatchConnection.ntp(next);
     },function(err,res){
       next(err,res.pop());
     });
-  }).add("request-closeAll",function(next){
+  }).add("request-closeAll",function(nil,next){
     //@-Users disconnect
     if(HostedMatch) return HostedMatch.end();
     RTCHost.closeAll(next);

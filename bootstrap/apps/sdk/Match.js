@@ -36,6 +36,7 @@ function Match(players_info){
         if(err) return next(err);
         console.log("after ntp");
         _this.lag = Math.max(player.lag,_this.lag);
+        next();
       });
     },
     function(player,next){
@@ -78,6 +79,7 @@ Match.prototype.join = function(client){
 
 Match.prototype.initialize = function(){
   if(_this._state !== Match.UNSTARTED){
+    console.log("not unstarted");
     return;
   }
   console.log("initializing");

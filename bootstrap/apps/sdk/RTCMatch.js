@@ -1,18 +1,12 @@
 var Match = require("./Match");
-var async = requirE("async");
-var browserify = require("browserify");
+var async = require("async");
 
-var game = browserify();
-
-game.add(process.argv[2].toString());
-game.bundle(function(err,value){
-  if(err) throw err;
-  game = value;
-});
 
 function RTCMatch(players){
+  console.log("inside RTCMatch");
   this.info = players;
   Match.call(this,players);
+  console.log("match has been called");
   this._playerInitializers.push(function(player,next){
     player.get("type","rtc",function(err,type){
       if(err) return next(err);
@@ -20,24 +14,30 @@ function RTCMatch(players){
       next();
     });
   });
+  console.log("added initializer");
   var that = this;
   this._playerInitializers.push(function(player,next){
     player.add("ice",function(message,next){
-      console.log("ice");
-      if(!that.players[message.target.id]){
+      var target = findPlayer(that.players,message.target);
+      if(!target){
+        console.log("cannot ice to a nonexistant user");
         return next("cannot ice to a nonexistant user");
       }
-      if(message.target.id == player.id){
-        return next("cannot ice to self: "+message.identity+", "+user.id);
+      if(target.user._id == player.user._id){
+        console.log("cannot ice to self: "+target.user._id+", "+player.user._id);
+        return next("cannot ice to self: "+target.user._id+", "+player.user._id);
       }
-      that.players[message.target.id].trigger("ice",message);
+      message.sender = player.user;
+      target.trigger("ice",message);
     });
     var others = that.players.slice(0);
     others.splice(others.indexOf(player),1);
     player.others = others;
     next();
   });
+  console.log("added initializer");
   this.on("start",this.bestHost.bind(this));
+  console.log("listening to start");
 }
 
 RTCMatch.prototype = Object.create(Match.prototype);
@@ -45,19 +45,24 @@ RTCMatch.prototype.constructor = RTCMatch;
 
 RTCMatch.prototype.applyHost = function(host,next){
   host.get("request-offers",this.info,function(err,offers){
-    async.each(host.others,function(other,next){
+    if(err) return next(err);
+    async.each(offers,function(offer,next){
       //$-Request an RTC accept from TESTER by sending TESTER a unique RTC offer
-      offers[other.id].sender = host.user;
-      other.get("request-accept",offers[other.id],function(err,accept){
+      offer.sender = host.user;
+      var other = findPlayer(host.others,offer.target);
+      if(!other){
+        return next(new Error("Target does not exist"));
+      }
+      other.get("request-accept",offer,function(err,accept){
+        if(err) return next(err);
         //$-Server sends accept to POSSIBLE_HOST
         accept.sender = other.user;
         host.get("request-handshake",accept,next);
       });
     },function(err){
       if(err) return next(err);
-      possible_host.get("request-ready",function(){
-        next();
-      });
+      console.log("requesting ok");
+      host.get("request-ready",next);
     });
   });
 };
@@ -65,7 +70,8 @@ RTCMatch.prototype.applyHost = function(host,next){
 RTCMatch.prototype.bestHost = function(){
   var bestHost = {host:null, netLag:Math.POSITIVE_INFINITY};
   var that = this;
-  async.eachSeries(this.players,function(possible_host,next){
+  var players = this.players;
+  async.eachSeries(players,function(possible_host,next){
     //$-Request RTC offers from POSSIBLE_HOST for each other Player
     that.applyHost(possible_host,function(err){
       if(err) return next(err);
@@ -101,13 +107,23 @@ RTCMatch.prototype.bestHost = function(){
       });
     });
   },function(err){
+    console.log(err);
+    if(err) throw err;
     that.syncCast("host",{host:bestHost.host.user,users:that.info});
     that.applyHost(bestHost.host,function(err){
       if(err) throw err;
+      console.log("best host given");
     });
   });
 };
 
+function findPlayer(players,target){
+  for(var i=0;i<players.length;i++){
+    if(players[i].user._id == target._id){
+      return players[i];
+    }
+  }
+}
 
 function calculateNTPWeight(a,b,all,next){
   if(Math.abs(a.lag - b.lag) > 20){

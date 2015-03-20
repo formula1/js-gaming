@@ -61,7 +61,8 @@
     "underscore": "^1.6.0",
     "vm-shim": "0.0.6",
     "waterline": "^0.10.18",
-    "websocket-driver": "^0.5.3"
+    "websocket-driver": "^0.5.3",
+    "wrtc": "0.0.49"
   },
   "devDependencies": {
     "websocket": "^1.0.17"
