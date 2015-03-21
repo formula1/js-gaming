@@ -1,14 +1,15 @@
-var Server = require("Server");
 var url = require("url");
 var querystring = require("qs");
+var Server = require("../../../../abstract/clientserver/client2server");
+
 jQuery(function($){
   var $matches = $("#match_container");
   var $form = $matches.find("form");
-  var MatchMaker = new Server("<%-routePaths.apps%>");
-  MatchMaker.add("game-location",function(next){
+  var MatchMaker = new Server("/apps");
+  MatchMaker.add("game_location",function(nil,next){
+    console.log("choose ws/rtc");
     var form, dialog;
-    dialog = $( $("#gametypehtml").html() ).dialog({
-     autoOpen: false,
+    dialog = $( "#game_location" ).dialog({
      modal: true,
      close: function() {
        form[ 0 ].reset();
@@ -17,9 +18,10 @@ jQuery(function($){
    });
    form = dialog.find( "form" ).on( "submit", function( event ) {
      event.preventDefault();
+     dialog.dialog("close");
      next(void(0),querystring.parse($form.serialize()));
    });
-   seTimeout(dialog.dialog.bind(dialog,"close"),30*1000);
+   setTimeout(dialog.dialog.bind(dialog,"close"),30*1000);
   });
 
   $form.on("submit",function(e){
@@ -28,7 +30,7 @@ jQuery(function($){
     MatchMaker.get("find", querystring.parse($form.serialize()), function(e,value){
       if(e) throw e;
       $matches.append($("<div><iframe "+
-        "src=\"<%-routePaths.apps%>/"+value.game+"/"+value.match+"\""+
+        "src=\"/apps/"+value.game+"/"+value.match+"\""+
         " ></iframe></div>"
       ));
     });

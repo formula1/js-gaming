@@ -1,12 +1,10 @@
 
-var MersenneTwister = require('mersennetwister');
 var Player = require("./Player");
 var EventEmitter = require("events").EventEmitter;
 var async = require("async");
 
 function Match(players_info){
   console.log("constructing match");
-  this.random = new MersenneTwister();
   var players = this.players = [];
   var _this = this;
   players_info.forEach(function(player){
@@ -65,7 +63,7 @@ Match.prototype.join = function(client){
   }
   player.open(client);
   _this = this;
-  async.applyEach(this._playerInitializers,player,function(err){
+  async.applyEachSeries(this._playerInitializers,player,function(err){
     if(err){
       console.log(err);
       player.trigger("reopen");
@@ -86,9 +84,8 @@ Match.prototype.initialize = function(){
   this._state = Match.STARTING;
   var l = this.players.length;
   while(l--){
-    if(!this.players[l].isOnline || !this.players[l].lag){
+    if(!this.players[l].isOnline){
       console.log(this.players[l].isOnline);
-      console.log(this.players[l].lag);
       this._state = Match.UNSTARTED;
       console.log("not init right now");
       return;

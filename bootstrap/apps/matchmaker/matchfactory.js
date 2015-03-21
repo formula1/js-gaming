@@ -70,7 +70,8 @@ function gameLocation(players,game,next){
   var ws = 0;
   var paying_users = [];
   async.each(players,function(player,next){
-    player.client.get("game-location",function(err,ob){
+    player.client.on("error",console.log.bind(console));
+    player.client.get("game_location",function(err,ob){
       if(err) return next(err);
       switch(ob.type){
         case "rtc": rtc += 1+parseInt(ob.amount); break;
@@ -98,6 +99,7 @@ function takeTheirMoney(payers,winners,next){
 function createServerMatch(players,game){
   var match_id = random();
   for(i=0, l = players.length;i<l;i++){
+    console.log("creating match");
     players[i].res(void(0),{game:game.name, match:match_id, type:"ws"});
     players[i] = players[i].user;
   }

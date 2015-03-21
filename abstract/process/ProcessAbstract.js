@@ -30,7 +30,6 @@ ProcessAbstract.prototype.open = function(context){
     }
     switch(message.type){
       case "message":
-        console.log("got a message");
         return that.handleMessage(message.msg);
       case "handle":
         console.log("got a socket");

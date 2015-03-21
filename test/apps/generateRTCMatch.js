@@ -30,7 +30,7 @@ async.map([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
   var socket = new WebSocket(baseuri, void(0), void(0), auth);
   var MatchFinder = new c2s(baseuri, socket);
   MatchFinder.on("error", next);
-  MatchFinder.add("game-location",function(){
+  MatchFinder.add("game_location",function(){
     return {type:"rtc",amount:"5"};
   });
   MatchFinder.get("find", {game:{name:"rps"}},function(e,value){
@@ -39,18 +39,34 @@ async.map([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
     var newuri = baseuri+"/"+value.game+"/"+value.match;
     socket = new WebSocket(newuri, void(0), void(0), auth);
     var TheAllower = new c2c(newuri,socket); //deja-vu, involves penguins somehow
-    TheAllower.add("ntp",function(){
-      console.log("ntp in the client");
-      return Date.now();
-    });
-    TheAllower.add("me",function(me){
-      TheAllower.me = me;
-      console.log("me in the client");
-      return true;
-    });
     TheAllower.on("error", next);
-    TheAllower.add("type",function(){
-      return "rtc";
+    TheAllower.add("type",function(type,next){
+      easyMode(TheAllower,function(){
+        next(void(0),type);
+      },function(host,next){
+          HostUser = host.host;
+          TheAllower.removeAllListeners("connection");
+          if(HostUser._id != TheAllower.me._id){
+            TheAllower.on("new-accept",function(connection){
+              console.log("accepting from rtc-player");
+              stdMatchHandling(connection);
+            });
+            return next();
+          }
+          console.log("creating real match: ",host.game);
+          superAgent.get("http://localhost:3000/apps/"+host.game.name+"/match.js")
+          .buffer().set("Authorization", authStr).end(function(err,res){
+            console.log("finished get request");
+            if(err) return next(err);
+            var match = new BrowserMatch(host.users,res.text);
+            TheAllower.on("connection",function(connection){
+              console.log("joined from rtc");
+              match.join(connection);
+            });
+            stdMatchHandling(joinSelf(TheAllower,match));
+            next(void(0),match);
+          });
+      });
     });
     var stdMatchHandling = function (TheMatch){
       TheMatch.add("ntp",function(){
@@ -66,30 +82,6 @@ async.map([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
         next(void(0),TheAllower);
       });
     };
-    easyMode(TheAllower,function(host,next){
-        HostUser = host.host;
-        TheAllower.removeAllListeners("connection");
-        if(HostUser._id != TheAllower.me._id){
-          TheAllower.on("new-accept",function(connection){
-            console.log("accepting from rtc-player");
-            stdMatchHandling(connection);
-          });
-          return next();
-        }
-        console.log("creating real match: ",host.game);
-        superAgent.get("http://localhost:3000/apps/"+host.game.name+"/match.js")
-        .buffer().set("Authorization", authStr).end(function(err,res){
-          console.log("finished get request");
-          if(err) return next(err);
-          var match = new BrowserMatch(host.users,res.text);
-          TheAllower.on("connection",function(connection){
-            console.log("joined from rtc");
-            match.join(connection);
-          });
-          stdMatchHandling(joinSelf(TheAllower,match));
-          next(void(0),match);
-        });
-    });
   });
 },function(err,res){
   if(err) throw err;

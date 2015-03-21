@@ -2,6 +2,7 @@
 var express = require("express");
 var browserify = require("browserify");
 var b = browserify();
+b.add("setimmediate");
 b.add(__dirname+"/matchmaker/browser");
 
 module.exports = function(ob){

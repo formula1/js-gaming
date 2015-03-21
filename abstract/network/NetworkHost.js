@@ -1,5 +1,5 @@
 var Server = require("../clientserver/client2server");
-var NetworkInstance = require(__dirname+"/NetworkUser.js");
+var NetworkInstance = require("./NetworkUser.js");
 var callprom = require("../utility/cbpromise");
 
 function ClientHost(uri,socket,config,sconfig){
@@ -7,10 +7,9 @@ function ClientHost(uri,socket,config,sconfig){
   this.connections = {};
   this.config = config||{'iceServers': [
     {url:'stun:stun.l.google.com:19302'},
-    {url: "stun:"+uri.hostname+":3478"},
+//    {url: "stun:"+this.uri.hostname+":3478"},
   ]};
-  this._list = [];
-  this.sconfig = sconfig||{reliable: false};
+  this.sconfig = sconfig||{};
   var that = this;
   this.user = void(0);
   this

@@ -23,14 +23,14 @@
       %>
     </section>
     <script type="text/javascript" src="apps/matchmaker.js" ></script>
-    <script type="text/html" id="gametypehtml">
+    <div class="template" id="game_location" title="Choose the Host Type">
       <form>
         <label><input type="radio" name="type" value="rtc" /> RTC</label>
         <label><input type="radio" name="type" value="ws" /> Server</label>
         <label><input type="number" name="amount" value=0 />Vote weight</label>
         <button type="submit" >Submit</button>
       </form>
-    </script>
+    </div>
     <%-include("../footer.ejs") %>
   </body>
 </html>

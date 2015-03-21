@@ -6,6 +6,9 @@ function NetworkInstance(nethost, user){
   this.user = user;
   this.nethost = nethost;
   MessageDuplex.call(this, function(message){
+    if(!this._ready) console.log("not ready");
+    console.log(JSON.stringify(message).length);
+    console.log(JSON.stringify(message));
     this.channel.send(JSON.stringify(message));
 	}.bind(this));
   this.pconn = new RTCPeerConnection(nethost.config,{
@@ -95,7 +98,7 @@ NetworkInstance.prototype.ok = function(message){
 };
 
 NetworkInstance.prototype.remoteIce = function(candidate){
-  this.pconn.addIceCandidate(candidate);
+  this.pconn.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
 NetworkInstance.prototype.iceCB = function(event){

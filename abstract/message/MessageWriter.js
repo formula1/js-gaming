@@ -104,6 +104,7 @@ MessageWriter.prototype._send = function(template,data){
 	}else{
 		//if there is an error queue it for later when socket connects
     console.log("queueing");
+    console.trace();
 		this.queue.push(clone);
 	}
 };

@@ -8,7 +8,7 @@ function RTCMatch(players,gameInfo){
   this.playerInfo = players;
   Match.call(this,players);
   console.log("match has been called");
-  this._playerInitializers.push(function(player,next){
+  this._playerInitializers.unshift(function(player,next){
     player.get("type","rtc",function(err,type){
       if(err) return next(err);
       if(type != "rtc") return next(new Error("improper type"));
@@ -69,12 +69,15 @@ RTCMatch.prototype.applyHost = function(host,next){
 };
 
 RTCMatch.prototype.bestHost = function(){
+  console.log("initiating best host");
   var bestHost = {host:null, netLag:Math.POSITIVE_INFINITY};
   var that = this;
   var players = this.players;
   async.eachSeries(players,function(possible_host,next){
+    console.log("one player");
     //$-Request RTC offers from POSSIBLE_HOST for each other Player
     that.applyHost(possible_host,function(err){
+      console.log("host applied");
       if(err) return next(err);
       var tester_ntps = {};
       var host_ntps = false;
@@ -109,7 +112,10 @@ RTCMatch.prototype.bestHost = function(){
       });
     });
   },function(err){
-    if(err) throw err;
+    if(err){
+      console.log(err);
+      throw err;
+    }
     console.log("finished finding best host");
     that.syncGet("host",{
       host:bestHost.host.user,

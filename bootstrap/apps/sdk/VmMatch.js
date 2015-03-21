@@ -13,7 +13,7 @@ var stdOps = {
 function VmMatch(players,gameInfo){
   console.log("constructing rps");
   Match.call(this,players);
-  this._playerInitializers.push(function(player,next){
+  this._playerInitializers.unshift(function(player,next){
     player.get("type","ws",function(err,type){
       if(err) return next(err);
       if(type != "ws") return next(new Error("improper type"));
