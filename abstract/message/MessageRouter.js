@@ -126,12 +126,7 @@ MessageRouter.prototype.processMessage = function(message,fn){
     message.data =(err)?null:result;
     that._returns.emit(message.id,message);
   };
-  var result;
-  try{
-    result = fn(message.data,next,message);
-  }catch(e){
-    return next(e);
-  }
+  var result = fn(message.data,next,message);
   if(typeof result != "undefined")
     next(void(0),result);
 };

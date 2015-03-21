@@ -31,14 +31,14 @@ module.exports = function(ob){
     req.theApp.public(req,res,next);
   });
   router.get("/:appname/match.js", function(req,res,next){
-    console.log("match");
+    console.log("match js: "+req.theApp.match_browser.length);
     res.status(200).setHeader('content-type', 'application/javascript');
-    res.send(req.theApp.match_browser);
+    res.end(req.theApp.match_browser);
   });
   router.get("/:appname/client.js", function(req,res,next){
-    console.log("client");
+    console.log("client js");
     res.status(200).setHeader('content-type', 'application/javascript');
-    res.send(req.theApp.browser);
+    res.end(req.theApp.browser);
   });
   router.get("/:appname/:match", function(req,res,next){
     console.log("public");

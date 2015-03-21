@@ -2,9 +2,10 @@ var Match = require("./Match");
 var async = require("async");
 
 
-function RTCMatch(players){
+function RTCMatch(players,gameInfo){
+  this._gameInfo = gameInfo;
   console.log("inside RTCMatch");
-  this.info = players;
+  this.playerInfo = players;
   Match.call(this,players);
   console.log("match has been called");
   this._playerInitializers.push(function(player,next){
@@ -44,7 +45,7 @@ RTCMatch.prototype = Object.create(Match.prototype);
 RTCMatch.prototype.constructor = RTCMatch;
 
 RTCMatch.prototype.applyHost = function(host,next){
-  host.get("request-offers",this.info,function(err,offers){
+  host.get("request-offers",this.playerInfo,function(err,offers){
     if(err) return next(err);
     async.each(offers,function(offer,next){
       //$-Request an RTC accept from TESTER by sending TESTER a unique RTC offer
@@ -81,6 +82,7 @@ RTCMatch.prototype.bestHost = function(){
       async.each(players,function(player,next){
         player.get("request-ntp",function(err,ntp){
           if(err) return next(err);
+          console.log("ntp returned");
           if(player == possible_host){
             host_ntps = ntp;
             for(var i in host_ntps){
@@ -97,9 +99,9 @@ RTCMatch.prototype.bestHost = function(){
           next();
         });
       },function(){
+        console.log("checking best host");
         bestHost = bestHost.netLag < net_ntp?
-          bestHost:
-          {host:possible_host, ntp:net_ntp};
+          bestHost:{host:possible_host, ntp:net_ntp};
         // $-Server orders all users to disconnect
         async.each(players,function(player,next){
           player.get("request-closeAll",next);
@@ -107,12 +109,18 @@ RTCMatch.prototype.bestHost = function(){
       });
     });
   },function(err){
-    console.log(err);
     if(err) throw err;
-    that.syncCast("host",{host:bestHost.host.user,users:that.info});
-    that.applyHost(bestHost.host,function(err){
-      if(err) throw err;
-      console.log("best host given");
+    console.log("finished finding best host");
+    that.syncGet("host",{
+      host:bestHost.host.user,
+      users:that.playerInfo,
+      game:that._gameInfo
+    },function(err){
+      that.applyHost(bestHost.host,function(err){
+        console.log(err);
+        if(err) throw err;
+        console.log("best host given");
+      });
     });
   });
 };

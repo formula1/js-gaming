@@ -1,5 +1,9 @@
 var radix = require('radix64').radix64;
 var async = require("async");
+var superAgent = require("superagent");
+var BrowserMatch = require("../../bootstrap/apps/sdk/Client/BrowserMatch");
+var MessageDuplex = require("../../abstract/message/MessageDuplex");
+
 
 global.WebSocket = require("websocket").w3cwebsocket;
 global.RTCPeerConnection = require("wrtc").RTCPeerConnection;
@@ -17,10 +21,11 @@ var c2c = require("../../abstract/network/NetworkHost");
 var easyMode = require("../../bootstrap/apps/sdk/Client/RTCInit");
 
 
-async.each([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
+async.map([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
+  var authStr = "Basic "+(new Buffer(i.u+":"+i.p)).toString('base64');
   var baseuri = "ws://localhost:3000/apps";
   var auth = {
-    Authorization: "Basic "+(new Buffer(i.u+":"+i.p)).toString('base64')
+    Authorization: authStr
   };
   var socket = new WebSocket(baseuri, void(0), void(0), auth);
   var MatchFinder = new c2s(baseuri, socket);
@@ -47,20 +52,74 @@ async.each([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
     TheAllower.add("type",function(){
       return "rtc";
     });
-    easyMode(TheAllower,function(err,match){
-      if(err) return next(e);
-      if(match) console.log("we are the host");
-      else console.log("we are not the host");
-      TheAllower.close();
-      TheAllower.closeAll();
-      next();
+    var stdMatchHandling = function (TheMatch){
+      TheMatch.add("ntp",function(){
+        console.log("ntp in the client");
+        return Date.now();
+      });
+      TheMatch.add("me",function(me){
+        console.log("me in the client");
+        return true;
+      });
+      TheMatch.add("ready",function(){
+        console.log("match started");
+        next(void(0),TheAllower);
+      });
+    };
+    easyMode(TheAllower,function(host,next){
+        HostUser = host.host;
+        TheAllower.removeAllListeners("connection");
+        if(HostUser._id != TheAllower.me._id){
+          TheAllower.on("new-accept",function(connection){
+            console.log("accepting from rtc-player");
+            stdMatchHandling(connection);
+          });
+          return next();
+        }
+        console.log("creating real match: ",host.game);
+        superAgent.get("http://localhost:3000/apps/"+host.game.name+"/match.js")
+        .buffer().set("Authorization", authStr).end(function(err,res){
+          console.log("finished get request");
+          if(err) return next(err);
+          var match = new BrowserMatch(host.users,res.text);
+          TheAllower.on("connection",function(connection){
+            console.log("joined from rtc");
+            match.join(connection);
+          });
+          stdMatchHandling(joinSelf(TheAllower,match));
+          next(void(0),match);
+        });
     });
   });
-},function(err){
+},function(err,res){
   if(err) throw err;
+  res.forEach(function(rtchost){
+    rtchost.close();
+    rtchost.closeAll();
+  });
   console.log("\n\n\n\nfinished webrtc\n\n\n\n".toUpperCase());
+  process.exit();
 });
+
+
+function joinSelf(TheAllower, match){
+  var ourPlayer, matchPlayer;
+  matchPlayer = new MessageDuplex(function(mess){
+    ourPlayer.handleMessage(mess);
+  });
+  matchPlayer.user = TheAllower.me;
+  ourPlayer = new MessageDuplex(function(mess){
+    matchPlayer.handleMessage(mess);
+  });
+  setImmediate(match.join.bind(match,matchPlayer));
+  console.log("joined self");
+  return ourPlayer;
+}
+
+
+
 
 setTimeout(function(){
   console.log("timing out");
+  process.exit();
 },10*1000);

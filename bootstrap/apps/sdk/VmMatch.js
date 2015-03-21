@@ -10,7 +10,7 @@ var stdOps = {
   filename: process.argv[2].toString("utf8")
 };
 
-function VmMatch(players){
+function VmMatch(players,gameInfo){
   console.log("constructing rps");
   Match.call(this,players);
   this._playerInitializers.push(function(player,next){

@@ -12,6 +12,7 @@ var RTCMatch = require("./RTCMatch");
 var parentCom = new ProcessAbstract(process);
 
 var app = new MatchHandler();
+var gameInfo;
 
 parentCom.handle.ws("/apps/:game/:matchid",function(req,sock,next){
   if(!req.user) return next("no user");
@@ -19,7 +20,9 @@ parentCom.handle.ws("/apps/:game/:matchid",function(req,sock,next){
   console.log("bound user");
   setImmediate(app.joinMatch.bind(app,req.params.matchid,User));
 });
-
+parentCom.add("info", function(data){
+  gameInfo = data;
+});
 parentCom.add("match", function(data){
   console.log("new match: "+data.match_id);
   console.log("expected # of players: "+data.players.length);
@@ -27,8 +30,7 @@ parentCom.add("match", function(data){
     console.log("child: ws match");
     app.createMatch(
       data.match_id,
-      data.players,
-      VmMatch
+      new VmMatch(data.players,gameInfo)
     );
     console.log("child: after ws match");
   }
@@ -36,8 +38,7 @@ parentCom.add("match", function(data){
     console.log("child: rtc match");
     app.createMatch(
       data.match_id,
-      data.players,
-      RTCMatch
+      new RTCMatch(data.players,gameInfo)
     );
     console.log("child: after rtc match");
   }

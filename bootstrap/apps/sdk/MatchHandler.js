@@ -5,9 +5,9 @@ function MatchHandler(timeout){
   this.queuedPlayers = [];
 }
 
-MatchHandler.prototype.createMatch = function(matchid,players,matchClass){
+MatchHandler.prototype.createMatch = function(matchid,match){
   console.log("inside createMatch");
-  this.matches[matchid] = new matchClass(players);
+  this.matches[matchid] = match;
   this.matches[matchid].id = matchid;
   var t = Date.now();
   var l = this.queuedPlayers.length;

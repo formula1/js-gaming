@@ -33,7 +33,6 @@ Player.prototype.open = function(client){
 };
 
 Player.prototype.ntp = function(next){
-  console.log("attempting to ntp");
   var old = Date.now();
   this.get("ntp", function(e,time){
     if(e){
@@ -56,9 +55,8 @@ Player.prototype.ntp = function(next){
 
 Player.prototype.me = function(next){
   this.get("me", this.user, function(e,boo){
-    if(e){
-      return next(e);
-    }
+    if(e) return next(e);
+    console.log(boo);
     if(boo !== true) return next("Improper Value");
     next();
   }.bind(this));

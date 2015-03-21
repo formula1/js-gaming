@@ -1,6 +1,6 @@
 var vm = require('vm-shim');
 var Match = require("../Match");
-
+var superAgent = require("superagent");
 
 function BrowserMatch(players,script){
   console.log("constructing browsermatch");
@@ -12,8 +12,10 @@ function BrowserMatch(players,script){
 BrowserMatch.prototype = Object.create(Match.prototype);
 BrowserMatch.prototype.constructor = BrowserMatch;
 
-BrowserMatch.createMatchFromUri = function(uri,users,next){
+BrowserMatch.createFromUri = function(uri,users,next){
+  console.log("creating match from uri");
   superAgent.get(uri).end(function(err,res){
+    console.log("finished get request");
     if(err) return next(err);
     next(void(0),new BrowserMatch(users,res.text));
   });

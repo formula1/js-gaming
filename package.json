@@ -57,6 +57,7 @@
     "session": "^0.1.0",
     "setimmediate": "^1.0.2",
     "stylizer": "^1.0.0",
+    "superagent": "^1.1.0",
     "templatizer": "^1.0.0",
     "underscore": "^1.6.0",
     "vm-shim": "0.0.6",

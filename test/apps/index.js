@@ -1,6 +1,7 @@
 var http = require("http");
 global.__root = __dirname+"/../..";
 var HandleRouter = require(__root+"/abstract/handle/HandleRouter");
+var express = require('express');
 var child_process = require("child_process");
 
 var config = require("getconfig");
@@ -10,9 +11,11 @@ var userserver = require(__root+"/bootstrap/user");
 var appserver = require(__root+"/bootstrap/apps")();
 
 var server = new http.Server();
-
-
 var serverRouter = new HandleRouter();
+var httpRouter = express();
+
+server.on("request",httpRouter);
+
 server.on("upgrade",function(req,soc,body){
   console.log("upgrade");
   req.body = body;
@@ -33,6 +36,12 @@ database.collect(function(e,mongo){
     if(e) throw e;
     appserver.collect(function(e,applist){
       if(e) throw e;
+      httpRouter
+        .use(userserver.middleware)
+        .use("/apps",appserver.router)
+        .use(function(req,res,err,next){
+          console.log(err);
+        });
       serverRouter
         .use(userserver.middleware)
         .use(appserver.wsrouter);

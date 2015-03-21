@@ -160,7 +160,6 @@ Match.prototype.end = function(){
   this._state = Match.ENDING;
   var l = this.players.length;
   while(l--){
-    this.players[l].removeAllListeners();
     this.players[l].exit();
   }
   this.emit("end",this);

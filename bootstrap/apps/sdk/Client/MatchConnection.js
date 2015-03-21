@@ -12,7 +12,6 @@ function MatchConnection(match_id, connection){
   this.id = match_id;
   var that = this;
   this.add("ntp",function(){
-    console.log("clientside npt");
     return Date.now();
   }).add("me",function(data){
     that.me = data;
@@ -39,14 +38,11 @@ MatchConnection.prototype.open = function(client){
 };
 
 MatchConnection.prototype.ntp = function(next){
-  console.log("attempting to ntp");
   var old = Date.now();
   this.get("ntp", function(e,time){
     if(e){
       return next(e);
     }
-    console.log("In the server");
-    console.log("inside npt");
     var now = Date.now();
     var lag = (now - old)/2;
     var offset = (time-old + now-time)/2;

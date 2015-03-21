@@ -36,22 +36,32 @@ ClientHost.prototype.closeAll = function(){
 };
 
 ClientHost.prototype.offer = function(user,cb){
-  var cr = callprom(this,cb);
   var id = user._id;
 	this.connections[id] = new NetworkInstance(this,user);
+  var cr = callprom(this.connections[id],cb);
   this.connections[id].on("open",this.emit.bind(this,"connection"));
+  var that = this;
+  this.connections[id].on("close",function(){
+    delete that.connections[id];
+  });
   this.connections[id].id = id;
 	this.connections[id].offer(cr.cb);
+  this.emit("new-offer",this.connections[id]);
   return cr.ret;
 };
 
 ClientHost.prototype.accept = function(message,cb){
-  var cr = callprom(this,cb);
 	var id = message.sender._id;
 	this.connections[id] = new NetworkInstance(this,message.sender);
+  var cr = callprom(this.connections[id],cb);
+  console.log("new network instance");
   this.connections[id].id = id;
   this.connections[id].on("open",this.emit.bind(this,"connection"));
+  this.connections[id].on("close",function(){
+    delete that.connections[id];
+  });
 	this.connections[id].accept(message,cr.cb);
+  this.emit("new-accept",this.connections[id]);
   return cr.ret;
 };
 

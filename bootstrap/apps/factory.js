@@ -71,6 +71,11 @@ function compileFork(ret,next){
 
 function compileProcessAbstract(ret,fork,next){
   ret.fork = new ProcessAbstract(fork);
+  ret.fork.trigger("info",{
+    name:ret.name,
+    min_players:ret.min_players,
+    max_players:ret.max_players,
+  });
   next(void(0),ret);
 }
 
@@ -141,6 +146,7 @@ function validateMatch(ret,next){
   .add(ret.path)
   .transform("brfs")
   .bundle(function(e,buff){
+    console.log("match data set");
     ret.match_browser = buff;
     next(e,ret);
   });
