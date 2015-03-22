@@ -1,4 +1,3 @@
-var Match = require("./VmMatch");
 
 function MatchHandler(timeout){
   this.timeout = timeout||Number.POSITIVE_INFINITY;
@@ -6,9 +5,9 @@ function MatchHandler(timeout){
   this.queuedPlayers = [];
 }
 
-MatchHandler.prototype.createMatch = function(matchid,players){
+MatchHandler.prototype.createMatch = function(matchid,match){
   console.log("inside createMatch");
-  this.matches[matchid] = new Match(players);
+  this.matches[matchid] = match;
   this.matches[matchid].id = matchid;
   var t = Date.now();
   var l = this.queuedPlayers.length;

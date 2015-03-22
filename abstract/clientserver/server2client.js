@@ -10,6 +10,13 @@ function Client(info, socket){
   }
   this.user = info.user;
   this.socket = socket;
+  socket.on("error",function(e){
+    console.log(e);
+    if(e.message == "write ECONNRESET"){
+      return _this.close();
+    }
+    _this.emit("error",e);
+  });
   socket.on("close",this.close.bind(this));
   this.driver = websocket.http(info.request, info.options);
   MessageDuplex.call(this,function(message){
@@ -27,10 +34,7 @@ function Client(info, socket){
     }
   });
   this.driver.on('error', this.emit.bind(this,"error"));
-  this.driver.on("close", function(){
-    _this.stop();
-    _this.emit("close");
-  });
+  this.driver.on("close",this.close.bind(this));
   socket.pipe(this.driver.io).pipe(socket);
   if(info.readyState === -1){
     if(info.body){
@@ -47,9 +51,10 @@ Client.prototype = Object.create(MessageDuplex.prototype);
 Client.prototype.constructor = Client;
 
 Client.prototype.close = function(){
-  this.removeAllListeners();
-  this._returns.removeAllListeners();
+  this.stop();
+  this.socket.destroy();
   this.driver.close();
+  this.emit("close");
 };
 
 Client.prototype.export = function(){

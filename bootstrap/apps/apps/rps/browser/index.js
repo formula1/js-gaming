@@ -1,7 +1,7 @@
 
 var $ = require("jquery");
 var Timer = require("./Timer");
-var Server = require("../../../../../abstract/clientserver/client2server");
+var GameConsole = require("match-connection");
 
 var status = 0;
 var me;
@@ -19,20 +19,11 @@ var timer = new Timer();
 timer.on("tick",tickCount);
 timer.on("timeout",timeOut);
 
-var GameConsole = new Server();
-
 GameConsole
 .add("ready",winloss)
 .add("countdown",countdown)
 .add("move", play)
-.add("results",parseResults)
-.add("ntp",function(){
-  console.log("clientside npt");
-  return Date.now();
-}).add("me",function(data){
-  me = data;
-  return true;
-});
+.add("results",parseResults);
 
 
 function tickCount(time){
@@ -85,7 +76,7 @@ function parseResults(data){
   var meval, oppval;
   console.log(me);
   for(var i in data){
-    if(i == me._id){
+    if(i == GameConsole.me._id){
       meval = data[i].move;
     }else{
       oppval = data[i].move;

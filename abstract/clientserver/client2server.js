@@ -51,8 +51,6 @@ Server.prototype = Object.create(MessageDuplex.prototype);
 Server.prototype.constructor = Server;
 
 Server.prototype.close = function(){
-  this.removeAllListeners();
-  this._returns.removeAllListeners();
   this.socket.close();
 };
 

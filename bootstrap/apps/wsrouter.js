@@ -12,7 +12,7 @@ module.exports = function(app){
     var u = new Client(req,socket);
     console.log("created client");
     u.add("find",function(query,res){
-      app.matchmaker.addUser(u.user,query,res,function(err,item){
+      app.matchmaker.addUser(u,query,res,function(err,item){
         if(err) return res(err);
         u.add("stop",function(){
           app.matchmaker.removeUser(item,next);

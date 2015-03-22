@@ -1,4 +1,3 @@
-var _ = require("lodash");
 var waitingPlayers = [];
 var READY = "ready";
 var COUNTDOWN = "countdown";

@@ -10,9 +10,16 @@ var stdOps = {
   filename: process.argv[2].toString("utf8")
 };
 
-function VmMatch(players){
+function VmMatch(players,gameInfo){
   console.log("constructing rps");
   Match.call(this,players);
+  this._playerInitializers.unshift(function(player,next){
+    player.get("type","ws",function(err,type){
+      if(err) return next(err);
+      if(type != "ws") return next(new Error("improper type"));
+      next();
+    });
+  });
   var sandbox = stdSandbox(process.argv[2].toString("utf8"));
   sandbox.match = this;
   this.vm = game.runInNewContext(sandbox, stdOps);

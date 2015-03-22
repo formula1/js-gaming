@@ -33,14 +33,11 @@ Player.prototype.open = function(client){
 };
 
 Player.prototype.ntp = function(next){
-  console.log("attempting to ntp");
   var old = Date.now();
   this.get("ntp", function(e,time){
     if(e){
       return next(e);
     }
-    console.log("In the server");
-    console.log("inside npt");
     var now = Date.now();
     var lag = (now - old)/2;
     var offset = (time-old + now-time)/2;
@@ -52,15 +49,14 @@ Player.prototype.ntp = function(next){
       return next(new Error("the offset difference is too large"));
     }
     this.offset = this.offset?(this.offset+offset)/2:offset;
-    next();
+    next(void(0),{id:this.id,lag:this.lag,offset:this.offset});
   }.bind(this));
 };
 
 Player.prototype.me = function(next){
   this.get("me", this.user, function(e,boo){
-    if(e){
-      return next(e);
-    }
+    if(e) return next(e);
+    console.log(boo);
     if(boo !== true) return next("Improper Value");
     next();
   }.bind(this));

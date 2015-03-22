@@ -1,12 +1,10 @@
 
-var MersenneTwister = require('mersennetwister');
 var Player = require("./Player");
 var EventEmitter = require("events").EventEmitter;
 var async = require("async");
 
 function Match(players_info){
   console.log("constructing match");
-  this.random = new MersenneTwister();
   var players = this.players = [];
   var _this = this;
   players_info.forEach(function(player){
@@ -30,6 +28,19 @@ function Match(players_info){
   this.lag = 0;
   this.data = {};
   this._state = Match.UNSTARTED;
+  this._playerInitializers = [
+    function(player,next){
+      player.ntp(function(err){
+        if(err) return next(err);
+        console.log("after ntp");
+        _this.lag = Math.max(player.lag,_this.lag);
+        next();
+      });
+    },
+    function(player,next){
+      player.me(next);
+    }
+  ];
   console.log("finished constructing match");
 }
 
@@ -52,37 +63,29 @@ Match.prototype.join = function(client){
   }
   player.open(client);
   _this = this;
-  player.ntp(function(err){
+  async.applyEachSeries(this._playerInitializers,player,function(err){
     if(err){
       console.log(err);
       player.trigger("reopen");
       player.close(client);
       return;
     }
-    console.log("after ntp");
-    _this.lag = Math.max(player.lag,_this.lag);
-    player.me(function(err){
-      if(err){
-        console.log(err);
-        player.close(client);
-      }
-      _this.emit("player-join",player);
-      _this.initialize();
-    });
+    _this.emit("player-join",player);
+    _this.initialize();
   });
 };
 
 Match.prototype.initialize = function(){
   if(_this._state !== Match.UNSTARTED){
+    console.log("not unstarted");
     return;
   }
   console.log("initializing");
   this._state = Match.STARTING;
   var l = this.players.length;
   while(l--){
-    if(!this.players[l].isOnline || !this.players[l].lag){
+    if(!this.players[l].isOnline){
       console.log(this.players[l].isOnline);
-      console.log(this.players[l].lag);
       this._state = Match.UNSTARTED;
       console.log("not init right now");
       return;
@@ -105,7 +108,7 @@ Match.prototype.syncGet = function(event,data,next){
     next = data;
     data = void(0);
   }
-  async.each(this.players[l],
+  async.each(this.players,
     function(item,next){
       item.get(event,data,next);
     },next
@@ -133,9 +136,18 @@ Match.prototype.lagGet = function(event,data,next){
     data = void(0);
   }
   var lag = this.lag;
-  async.each(this.players[l],
+  async.each(this.players,
     function(item,next){
       setTimeout(item.get.bind(item,event,data,next), lag - item.lag);
+    },next
+  );
+};
+
+Match.prototype.ntp = function(next){
+  var lag = this.lag;
+  async.each(this.players,
+    function(item,next){
+      item.ntp(next);
     },next
   );
 };
@@ -145,7 +157,6 @@ Match.prototype.end = function(){
   this._state = Match.ENDING;
   var l = this.players.length;
   while(l--){
-    this.players[l].removeAllListeners();
     this.players[l].exit();
   }
   this.emit("end",this);

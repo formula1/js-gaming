@@ -71,6 +71,11 @@ function compileFork(ret,next){
 
 function compileProcessAbstract(ret,fork,next){
   ret.fork = new ProcessAbstract(fork);
+  ret.fork.trigger("info",{
+    name:ret.name,
+    min_players:ret.min_players,
+    max_players:ret.max_players,
+  });
   next(void(0),ret);
 }
 
@@ -128,16 +133,31 @@ function validateClient(ret,next){
   torun.push(function(next){
     next(void(0),ret);
   });
+  torun.push(validateMatch);
   if(ret.client.readme) torun.push(validateReadme);
   if(ret.browser) torun.push(validateBrowser);
   if(ret.client.public) torun.push(validatePublic);
   async.waterfall(torun,next);
 }
 
-function validateBrowser(ret,next){
+function validateMatch(ret,next){
   browserify()
   .add("setimmediate")
+  .add(ret.path)
+  .transform("brfs")
+  .bundle(function(e,buff){
+    console.log("match data set");
+    ret.match_browser = buff;
+    next(e,ret);
+  });
+}
+
+function validateBrowser(ret,next){
+  browserify()
+  .require(__dirname+"/sdk/Client",{expose:"match-connection"})
+  .add("setimmediate")
   .add(ret.browser)
+  .transform("brfs")
   .bundle(function(e,buff){
     ret.browser = buff;
     next(e,ret);

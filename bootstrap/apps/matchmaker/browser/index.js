@@ -1,36 +1,42 @@
-var $ = require("jquery");
-var async = require("async");
-var Server = require(__root+"/abstract/clientserver/client2server.js");
-var Manager = require(__root+"/abstract/window/WindowManager.js");
 var url = require("url");
+var querystring = require("qs");
+var Server = require("../../../../abstract/clientserver/client2server");
 
-function MatchMaker(container,notify){
-  Manager.call(this);
-  this.ws = new Server(url.resolve(window.location,"/match"));
-  this.form = $(form);
-  var that = this;
-  this.form.on("submit",function(e){
+jQuery(function($){
+  var $matches = $("#match_container");
+  var $form = $matches.find("form");
+  var MatchMaker = new Server("/apps");
+  MatchMaker.add("game_location",function(nil,next){
+    console.log("choose ws/rtc");
+    var form, dialog;
+    dialog = $( "#game_location" ).dialog({
+     modal: true,
+     close: function() {
+       form[ 0 ].reset();
+       next(void(0),{type:"rtc",amount:0});
+     }
+   });
+   form = dialog.find( "form" ).on( "submit", function( event ) {
+     event.preventDefault();
+     dialog.dialog("close");
+     next(void(0),querystring.parse($form.serialize()));
+   });
+   setTimeout(dialog.dialog.bind(dialog,"close"),30*1000);
+  });
+
+  $form.on("submit",function(e){
     e.preventDefault();
-    var serialized = that.form.serialize();
-    that.ws.get("find", function(e,value){
-      that.loadWindow("/apps/"+value.gamename+"/"+value.matchid);
+    if(!MatchMaker.ready) return;
+    MatchMaker.get("find", querystring.parse($form.serialize()), function(e,value){
+      if(e) throw e;
+      $matches.append($("<div><iframe "+
+        "src=\"/apps/"+value.game+"/"+value.match+"\""+
+        " ></iframe></div>"
+      ));
     });
   });
-}
-
-MatchMaker.prototype.showForm = function(){
-
-};
-
-MatchMaker.prototype = Object.create(Manager.prototype);
-MatchMaker.constructor = MatchMaker;
-/*
-MatchMaker.prototype.parseForm = function(){
-  var form = this.htmlForm.serialize();
-  if(form.name)
-  if(form.min_players)
-  if(form.max_players)
-  if(form.blocklist)
-};
-*/
-//MatchMaker.prototype.sendQuery
+  var uri = url.parse(document.location.href);
+  if(!uri.search) return;
+  $form.unserialize(uri.search.substring(/^\?/.test(uri)?1:0));
+  $form.submit();
+});
