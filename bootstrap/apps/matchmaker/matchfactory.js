@@ -9,7 +9,8 @@ module.exports = function(players,game,allgames){
       next(void(0),players,game);
     },
 //    chooseGameType,
-    gameLocation,
+//    gameLocation,
+    createServerMatch,
   ],function(err){
     if(err) throw err;
   });

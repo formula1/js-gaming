@@ -55,9 +55,7 @@ MessageRouter.prototype.add = function(keymethod){
   }
 
   Object.keys(ob).forEach(function(key){
-    that.addListener(key,function(message){
-      that.processMessage(message, ob[key]);
-    });
+    that.addListener(key,that.processMessage.bind(that,ob[key]));
     that.emit("add",key,ob[key]);
   });
   return this;
@@ -79,15 +77,28 @@ MessageRouter.prototype.routeMessage = function(message,user,retFn){
   var that = this;
   retFn = (retFn)?retFn:this.rSendFn;
 
-  if(this.getListeners(message.name).length === 0){
-    message.data = null;
-    message.error = "method "+message.name+" does not exist";
-    return retFn(message,user);
-  }
 
+  var torun;
+
+  if(this.getListeners(message.name).length > 0){
+    torun = this.emit.bind(this,message.name,message);
+  }else{
+  /*  if(
+      this[message.name] &&
+      !MessageRouter.prototype[message.name] &&
+      typeof this[message.name] == "function"
+    ){
+      torun = this.processMessage.bind(this,this[message.name],message);
+    }else{
+    */
+      message.data = null;
+      message.error = "method "+message.name+" does not exist";
+      return retFn(message,user);
+    /*}*/
+  }
   message.user = user;
 
-  if(this.getListeners(message.id).length === 0)
+  if(this.getListeners(message.id).length === 0){
     switch(message.type){
       case "get":
         this._returns.once(message.id,function(message){
@@ -98,6 +109,7 @@ MessageRouter.prototype.routeMessage = function(message,user,retFn){
         var fn = function(message){
           retFn(message,user);
         };
+
         this._returns.on(message.id,fn);
         message.user.on('close',this.removeListener.bind(this,message.id,fn));
         break;
@@ -110,7 +122,8 @@ MessageRouter.prototype.routeMessage = function(message,user,retFn){
         message.error = "Bad message type "+message.type;
         return retFn(message,user);
     }
-  setImmediate(this.emit.bind(this,message.name,message));
+  }
+  setImmediate(torun);
 };
 
 /**
@@ -119,14 +132,14 @@ MessageRouter.prototype.routeMessage = function(message,user,retFn){
   @param {object} message - request message
   @param {function} fn - the function that will be called
 */
-MessageRouter.prototype.processMessage = function(message,fn){
+MessageRouter.prototype.processMessage = function(fn,message){
   var that = this;
   var next = function(err,result){
     message.error = (err)?err.stack:null;
     message.data =(err)?null:result;
     that._returns.emit(message.id,message);
   };
-  var result = fn(message.data,next,message);
+  var result = fn.call(this,message.data,next,message);
   if(typeof result != "undefined")
     next(void(0),result);
 };

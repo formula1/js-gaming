@@ -17,7 +17,7 @@ async.each([{u:"sam",p:"poop"},{u:"apps",p:"login"}],function(i,next){
   };
   var socket = new WebSocket(baseuri, void(0), void(0), auth);
   var MatchFinder = new c2s(baseuri, socket);
-  MatchFinder.on("error",next);
+  MatchFinder.on("error",console.trace.bind(console));
   MatchFinder.add("game_location",function(){
     return {type:"ws",amount:"1"};
   });

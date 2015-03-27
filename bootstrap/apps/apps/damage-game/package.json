@@ -1,0 +1,18 @@
+{
+  "name": "damage-game",
+  "version": "0.1.0",
+  "description": "Simple Damage Game for js-gaming",
+  "main": "match.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sam Tobia",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^2.1.3"
+  },
+  "game":{
+    "minimum_players":2,
+    "maximum_players":2
+  }
+}

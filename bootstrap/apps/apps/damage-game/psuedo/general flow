@@ -1,0 +1,23 @@
+Damage Game
+
+Match
+1) listen for team choices
+2) When all players are ready -> Go to 3
+3) Enter Ingame
+  while(endConditions != true)
+    -get active players's actions
+    Apply the action to the game
+    Set which player's will be active
+    -Send the net results of all actions to the screen
+    -If a move would cause a player to get priority
+      -Wait for that user to do an action
+  -Send Results of End condition to each player
+
+Player
+-On Start-Choose their team
+-On Ingame
+  -Choose to attack
+  -Choose to tag out
+-ON winloss
+  -Display winloss
+  -Allow player to start choosing their team again

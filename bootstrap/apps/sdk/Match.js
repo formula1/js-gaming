@@ -38,6 +38,7 @@ function Match(players_info){
       });
     },
     function(player,next){
+      console.log(arguments);
       player.me(next);
     }
   ];

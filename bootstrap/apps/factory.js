@@ -1,5 +1,6 @@
 var async = require("async");
 var fs = require("fs");
+var path = require("path");
 
 var mime = require("mime");
 var markdown = require("markdown").markdown;
@@ -8,6 +9,8 @@ var browserify = require("browserify");
 var child_process = require("child_process");
 var ProcessAbstract = require(__root+"/abstract/process/ProcessAbstract");
 
+var b_builtins = require("browserify/lib/builtins.js");
+b_builtins["match-connection"] = require.resolve(__dirname+"/sdk/Client")
 
 
 function startApp(path,next){
@@ -153,11 +156,9 @@ function validateMatch(ret,next){
 }
 
 function validateBrowser(ret,next){
-  browserify()
-  .require(__dirname+"/sdk/Client",{expose:"match-connection"})
+  browserify({builtins:b_builtins})
   .add("setimmediate")
   .add(ret.browser)
-  .transform("brfs")
   .bundle(function(e,buff){
     ret.browser = buff;
     next(e,ret);
