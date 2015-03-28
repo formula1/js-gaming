@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+  <style type="text/css">
+    body>div{display:none;}
+    body>.active{display:block;}
+  </style>
+  <script type="text/javascript" src="//cdn.temasys.com.sg/adapterjs/0.10.x/adapter.min.js"></script>
+</head>
+<body>
+  <div class="tab-selector">
+    <h3>Teams</h3>
+    <div>
+      <button class="addnew">Add New</button>
+    </div>
+    <h3>Characters</h3>
+    <div>
+      <button class="addnew">Add New</button>
+    </div>
+    <h3>Moves</h3>
+    <div>
+      <button class="addnew">Add New</button>
+    </div>
+  </div>
+  <div class="tab-viewer">
+    <script type="text/html" id="team-template">
+      <div class="team-template">
+        <h3 class="{{isComplete}}">{{name}}</h3>
+        <ul class="stats">
+          <li>Number of Matches: <span>{{num_matches}}</span></li>
+          <li>Win Ratio: <span>{{winratio}}</span></li>
+          <li>Ranking: <span>{{ranking}}</span></li>
+        </ul>
+        <ul class="characters">
+        </ul>
+      </div>
+    </script>
+    <script type="text/html" id="character-template">
+      <div class="character-template">
+        <h3 class="{{isComplete}}">{{name}}</h3>
+        <ul class="stats">
+          <li>Hit Points: <span>{{def.hp}}</span></li>
+          <li>Damage Cap: <span>{{def.cap}}</span></li>
+          <li>Base Damage: <span>{{off.dmg}}</span></li>
+          <li>Attack Speed: <span>{{off.spd}}</span></li>
+        </ul>
+        <ul class="moves">
+        </ul>
+        <!-- Adds base power -->
+        <ul class="triggers">
+        </ul>
+      </div>
+    </script>
+    <script type="text/html" id="move-template">
+      <div class="move-template">
+        <h3 class="{{isComplete}}">{{name}}</h3>
+        <ul class="stats">
+          <li>Damage to Opponent: <span>{{opp.dmg}}</span></li>
+          <li>Damage to Self: <span>{{self.dmg}}</span></li>
+          <li>Speed: <span>{{spd}}</span></li>
+          <!--
+            Switch Types: False, You, random, Opp
+            If switch is on, base power is lowered
+            If you choose - base power is lowered more
+            If random - base power is not changed
+            If Opponent chooses - Base power is raised slightly
+          -->
+        </ul>
+        <ul class="switch-stats" >
+          <li
+          <li>Switches Opponent: <span>{{opp.switch}}</span></li>
+          <li>Switches Self: <span>{{self.switch}}</span></li>
+        </ul>
+        <!-- For each buff, base power is subtracted by the buff power-->
+        <ul class="triggers">
+        </ul>
+        <!-- For each buff, base power is subtracted by the buff power-->
+        <ul class="buffs">
+        </ul>
+      </div>
+    </script>
+    <script type="text/html" id="bench-template" >
+      <li>Bench Effect:
+        <ul class="stats">
+          <li>Damage: <span>{{dmg}}</span></li>
+          <li>Speed: <span>{{dmg}}</span></li>
+        </ul>
+        <ul>
+          <li>Number of random choice: <span>{{opp.bench.random}}</span></li>
+          <li>Number of Your choice: <span>{{opp.bench.self}}</span></li>
+          <li>Number of Opp choice: <span>{{opp.bench.opp}}</span></li>
+        </ul>
+      </li>
+    </script>
+  </div>
+  <script type="text/javascript" src="/apps/damage-game/custom.js"></script>
+</body>
+</html>
