@@ -4,6 +4,7 @@ var async = require("async");
 
 function RTCMatch(players,gameInfo){
   this._gameInfo = gameInfo;
+  console.log(gameInfo);
   console.log("inside RTCMatch");
   this.playerInfo = players;
   Match.call(this,players);
@@ -116,7 +117,7 @@ RTCMatch.prototype.bestHost = function(){
       console.log(err);
       throw err;
     }
-    console.log("finished finding best host");
+    console.log("finished finding best host: ",that._gameInfo);
     that.syncGet("host",{
       host:bestHost.host.user,
       users:that.playerInfo,

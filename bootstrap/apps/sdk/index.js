@@ -21,6 +21,7 @@ parentCom.handle.ws("/apps/:game/:matchid",function(req,sock,next){
   setImmediate(app.joinMatch.bind(app,req.params.matchid,User));
 });
 parentCom.add("info", function(data){
+  console.log(data);
   gameInfo = data;
 });
 parentCom.add("match", function(data){
@@ -36,6 +37,7 @@ parentCom.add("match", function(data){
   }
   if(data.type == "rtc"){
     console.log("child: rtc match");
+    console.log(gameInfo);
     app.createMatch(
       data.match_id,
       new RTCMatch(data.players,gameInfo)
