@@ -24,8 +24,12 @@ NetworkInstance.prototype.constructor = NetworkInstance;
 
 NetworkInstance.prototype.close = function(){
   this.stop();
-  this.channel.close();
-  this.pconn.close();
+  try{
+    this.pconn.close();
+    this.channel.close();
+  }catch(e){
+    //we don't care
+  }
 };
 
 NetworkInstance.prototype.offer = function(cb){

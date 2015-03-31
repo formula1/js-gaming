@@ -9,8 +9,8 @@ module.exports = function(players,game,allgames){
       next(void(0),players,game);
     },
 //    chooseGameType,
-//    gameLocation,
-    createServerMatch,
+    gameLocation,
+//    createServerMatch,
   ],function(err){
     if(err) throw err;
   });
@@ -98,6 +98,7 @@ function takeTheirMoney(payers,winners,next){
 }
 
 function createServerMatch(players,game){
+  console.log(game);
   var match_id = random();
   for(i=0, l = players.length;i<l;i++){
     console.log("creating match");
@@ -108,6 +109,7 @@ function createServerMatch(players,game){
 }
 
 function createClientMatch(players,game){
+  console.log(game);
   var match_id = random();
   for(i=0, l = players.length;i<l;i++){
     players[i].res(void(0),{game:game.name, match:match_id, type:"rtc"});

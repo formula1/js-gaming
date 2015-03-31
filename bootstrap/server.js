@@ -55,7 +55,7 @@ database.collect(function(e){
       .use('/temp', function(req,res,next){
         res.render("generic");
       });
-      test.routes(httpserver);
+//      test.routes(httpserver);
 
       wsserver
       .use(userserver.middleware)

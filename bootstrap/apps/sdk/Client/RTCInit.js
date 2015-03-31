@@ -96,7 +96,7 @@ module.exports = function(RTCHost,cb,hostHandler){
   }).add("request-ntp",function(nil,next){
     //@-User runs NTP
     //@-User sends ntp data to server
-    var times = 10;
+    var times = 3;
     async.times(times,function(nil,next){
       if(HostedMatch){
         return HostedMatch.ntp(next);
